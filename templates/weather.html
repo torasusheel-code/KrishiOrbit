@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>KrishiOrbit | Smart Weather</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f8f2;
+            color: #20352a;
+        }
+
+        .navbar {
+            background: #087443;
+            color: white;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .hero {
+            padding: 45px 6%;
+            color: white;
+            background:
+                linear-gradient(
+                    120deg,
+                    rgba(4, 75, 43, 0.92),
+                    rgba(18, 135, 76, 0.78)
+                ),
+                url("/static/images/crop-bg.jpg");
+
+            background-size: cover;
+            background-position: center;
+        }
+
+        .hero h1 {
+            font-size: 35px;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            line-height: 1.7;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            max-width: 550px;
+            margin-top: 24px;
+        }
+
+        .search-form input {
+            flex: 1;
+            min-width: 0;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .search-form button {
+            background: #ffca3a;
+            color: #24452d;
+            border: none;
+            padding: 13px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1250px;
+            margin: 30px auto;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #087443;
+            margin-bottom: 18px;
+        }
+
+        .weather-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.06);
+            margin-bottom: 30px;
+        }
+
+        .current-weather {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .metric {
+            background: #edf8ef;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .metric .icon {
+            font-size: 29px;
+            margin-bottom: 10px;
+        }
+
+        .metric h3 {
+            color: #087443;
+            font-size: 23px;
+            margin: 8px 0;
+        }
+
+        .muted {
+            color: #64756a;
+            font-size: 14px;
+        }
+
+        .alert {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            line-height: 1.7;
+        }
+
+        .alert.high {
+            background: #fff0ee;
+            border-left: 5px solid #e24b3b;
+        }
+
+        .alert.medium {
+            background: #fff8e5;
+            border-left: 5px solid #e5a800;
+        }
+
+        .alert.low {
+            background: #eaf7ed;
+            border-left: 5px solid #229451;
+        }
+
+        .alert h3 {
+            margin-bottom: 7px;
+        }
+
+        .hourly-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+        }
+
+        .hour-card {
+            background: #edf8ef;
+            border-radius: 12px;
+            padding: 17px 10px;
+            text-align: center;
+        }
+
+        .hour-card .hour-icon {
+            font-size: 28px;
+            margin: 12px 0;
+        }
+
+        .hour-card h3 {
+            color: #087443;
+            margin-bottom: 8px;
+        }
+
+        .hour-card p {
+            font-size: 13px;
+            margin: 7px 0;
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+        }
+
+        .forecast-card {
+            background: #edf8ef;
+            padding: 17px 10px;
+            text-align: center;
+            border-radius: 12px;
+        }
+
+        .forecast-icon {
+            font-size: 30px;
+            margin: 12px 0;
+        }
+
+        .forecast-description {
+            color: #087443;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 8px 0;
+            min-height: 30px;
+        }
+
+        .forecast-card p {
+            font-size: 13px;
+            margin: 8px 0;
+        }
+
+        .advice-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .advice-card {
+            background: white;
+            padding: 23px;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            line-height: 1.8;
+        }
+
+        .advice-card h3 {
+            color: #087443;
+            margin-bottom: 12px;
+        }
+
+        .advice-card li {
+            margin: 10px 0 10px 20px;
+        }
+
+        .sun-times {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .sun-box {
+            background: #fff7df;
+            padding: 17px 25px;
+            border-radius: 12px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .error-box {
+            background: #fff0ee;
+            color: #9b2418;
+            padding: 18px;
+            border-radius: 10px;
+            margin: 25px 0;
+        }
+
+        .footer {
+            margin-top: 45px;
+            padding: 25px;
+            background: #075c36;
+            color: white;
+            text-align: center;
+        }
+
+        @media (max-width: 950px) {
+            .current-weather {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .hourly-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .forecast-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 27px;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .current-weather {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .hourly-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .forecast-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .advice-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                width: 94%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">🌱 KrishiOrbit</div>
+
+        <div>
+            <a href="/">Home</a>
+            &nbsp;&nbsp;&nbsp;
+            <a href="/weather">Weather</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <h1>🌦️ Smart Weather Dashboard</h1>
+
+        <p>
+            Get weather updates and plan your farming activities more effectively.
+        </p>
+
+        <form action="/weather" method="GET" class="search-form">
+            <input
+                type="text"
+                name="city"
+                placeholder="Enter city name..."
+                value="{{ city }}"
+                required
+            >
+
+            <button type="submit">🔍 Search</button>
+        </form>
+    </section>
+
+    {% if error %}
+        <div class="container">
+            <div class="error-box">
+                ⚠️ {{ error }}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if weather %}
+
+    <main class="container">
+
+        <!-- CURRENT WEATHER -->
+        <section class="weather-card">
+            <h2 class="section-title">📍 Current Weather</h2>
+
+            <h3>
+                {{ weather.city }}
+                {% if weather.country %}
+                    , {{ weather.country }}
+                {% endif %}
+            </h3>
+
+            <p class="muted">
+                Current Weather Information
+
+            </p>
+
+            <div class="current-weather">
+
+                <div class="metric">
+                    <div class="icon">🌡️</div>
+                    <p class="muted">Temperature</p>
+
+                    <h3>
+                        {% if weather.temperature is not none %}
+                            {{ weather.temperature }}°C
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                </div>
+
+                <div class="metric">
+                    <div class="icon">💧</div>
+                    <p class="muted">Humidity</p>
+
+                    <h3>
+                        {% if weather.humidity is not none %}
+                            {{ weather.humidity }}%
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                </div>
+
+                <div class="metric">
+                    <div class="icon">🌬️</div>
+                    <p class="muted">Wind Speed</p>
+
+                    <h3>
+                        {% if weather.wind is not none %}
+                            {{ weather.wind }} km/h
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                </div>
+
+                <div class="metric">
+                    <div class="icon">🌧️</div>
+                    <p class="muted">Precipitation</p>
+
+                    <h3>
+                        {% if weather.precipitation is not none %}
+                            {{ weather.precipitation }} mm
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                </div>
+
+            </div>
+
+            <p style="margin-top: 20px;">
+                <strong>Feels Like:</strong>
+
+                {% if weather.feels_like is not none %}
+                    {{ weather.feels_like }}°C
+                {% else %}
+                    N/A
+                {% endif %}
+            </p>
+        </section>
+
+        <!-- RAIN ALERT -->
+        {% if rain_alert %}
+        <section class="weather-card">
+            <h2 class="section-title">🌧️ Rain Alert</h2>
+
+            <div class="alert {{ rain_alert.level }}">
+                <h3>{{ rain_alert.title }}</h3>
+                <p>{{ rain_alert.message }}</p>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- HOURLY FORECAST -->
+        <section class="weather-card">
+            <h2 class="section-title">
+                ⏰ Next 12 Hours Forecast
+            </h2>
+
+            {% if hourly_forecast %}
+
+            <div class="hourly-grid">
+
+                {% for hour in hourly_forecast %}
+
+                <div class="hour-card">
+
+                    <strong>{{ hour.time }}</strong>
+
+                    <div class="hour-icon">
+                        {% if hour.weather_code is none %}
+                            🌤️
+                        {% elif hour.weather_code == 0 %}
+                            ☀️
+                        {% elif hour.weather_code in [1, 2] %}
+                            🌤️
+                        {% elif hour.weather_code == 3 %}
+                            ☁️
+                        {% elif hour.weather_code in [45, 48] %}
+                            🌫️
+                        {% elif hour.weather_code in [51, 53, 55, 56, 57] %}
+                            🌦️
+                        {% elif hour.weather_code in [61, 63, 65, 66, 67, 80, 81, 82] %}
+                            🌧️
+                        {% elif hour.weather_code in [71, 73, 75, 77, 85, 86] %}
+                            ❄️
+                        {% elif hour.weather_code in [95, 96, 99] %}
+                            ⛈️
+                        {% else %}
+                            🌤️
+                        {% endif %}
+                    </div>
+
+                    <h3>
+                        {% if hour.temperature is not none %}
+                            {{ hour.temperature }}°C
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+
+                    <p>
+                        🌧️ Rain:
+
+                        {% if hour.rain_chance is not none %}
+                            {{ hour.rain_chance }}%
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </p>
+
+                    <p>
+                        💧 {{ hour.rainfall if hour.rainfall is not none else 'N/A' }} mm
+                    </p>
+
+                    <p>
+                        💨
+                        {{ hour.wind if hour.wind is not none else 'N/A' }}
+                        km/h
+                    </p>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+                <p>Hourly forecast is currently unavailable.</p>
+            {% endif %}
+        </section>
+
+        <!-- 7-DAY FORECAST -->
+        <section class="weather-card">
+            <h2 class="section-title">
+                📅 7-Day Weather Forecast
+            </h2>
+
+            <div class="forecast-grid">
+
+                {% for day in forecast %}
+
+                <div class="forecast-card">
+
+                    <strong>
+                        {{ day.day_name }}
+                    </strong>
+
+                    <p class="muted">
+                        {{ day.formatted_date }}
+                    </p>
+
+                    <div class="forecast-icon">
+                        {% if day.weather_code is none %}
+                            🌤️
+                        {% elif day.weather_code == 0 %}
+                            ☀️
+                        {% elif day.weather_code in [1, 2] %}
+                            🌤️
+                        {% elif day.weather_code == 3 %}
+                            ☁️
+                        {% elif day.weather_code in [45, 48] %}
+                            🌫️
+                        {% elif day.weather_code in [51, 53, 55, 56, 57] %}
+                            🌦️
+                        {% elif day.weather_code in [61, 63, 65, 66, 67, 80, 81, 82] %}
+                            🌧️
+                        {% elif day.weather_code in [71, 73, 75, 77, 85, 86] %}
+                            ❄️
+                        {% elif day.weather_code in [95, 96, 99] %}
+                            ⛈️
+                        {% else %}
+                            🌤️
+                        {% endif %}
+                    </div>
+
+                    <p class="forecast-description">
+                        {% if day.weather_code == 0 %}
+                            Sunny
+                        {% elif day.weather_code in [1, 2] %}
+                            Partly Cloudy
+                        {% elif day.weather_code == 3 %}
+                            Cloudy
+                        {% elif day.weather_code in [45, 48] %}
+                            Foggy
+                        {% elif day.weather_code in [51, 53, 55, 56, 57] %}
+                            Drizzle
+                        {% elif day.weather_code in [61, 63, 65, 66, 67] %}
+                            Rainy
+                        {% elif day.weather_code in [71, 73, 75, 77] %}
+                            Snowy
+                        {% elif day.weather_code in [80, 81, 82] %}
+                            Rain Showers
+                        {% elif day.weather_code in [85, 86] %}
+                            Snow Showers
+                        {% elif day.weather_code in [95, 96, 99] %}
+                            Thunderstorm
+                        {% else %}
+                            Variable Weather
+                        {% endif %}
+                    </p>
+
+                    <h3>
+                        {{ day.max_temp if day.max_temp is not none else 'N/A' }}°
+                    </h3>
+
+                    <p class="muted">
+                        Low:
+                        {{ day.min_temp if day.min_temp is not none else 'N/A' }}°
+                    </p>
+
+                    <p>
+                        🌧️
+                        {{ day.rain_chance if day.rain_chance is not none else 'N/A' }}%
+                    </p>
+
+                    <p>
+                        💧
+                        {{ day.rainfall if day.rainfall is not none else 'N/A' }} mm
+                    </p>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+        </section>
+
+        <!-- SUNRISE AND SUNSET -->
+        {% if forecast %}
+
+        <section class="weather-card">
+            <h2 class="section-title">
+                🌅 Sunrise & Sunset
+            </h2>
+
+            <div class="sun-times">
+
+                <div class="sun-box">
+                    <h3>🌅 Sunrise</h3>
+
+                    <p>
+                        {{ forecast[0].sunrise }}
+                    </p>
+                </div>
+
+                <div class="sun-box">
+                    <h3>🌇 Sunset</h3>
+
+                    <p>
+                        {{ forecast[0].sunset }}
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        {% endif %}
+
+        <!-- FARMING ADVICE -->
+        <section class="weather-card">
+            <h2 class="section-title">
+                🌱 Farming Advice
+            </h2>
+
+            <div class="advice-card">
+
+                {% if farming_advice %}
+
+                <ul>
+                    {% for advice in farming_advice %}
+                        <li>{{ advice }}</li>
+                    {% endfor %}
+                </ul>
+
+                {% else %}
+
+                    <p>
+                        Get farming advice based on crop conditions and local weather.
+                    </p>
+
+                {% endif %}
+
+            </div>
+        </section>
+
+        <!-- IRRIGATION ADVICE -->
+        {% if irrigation_advice %}
+
+        <section class="weather-card">
+            <h2 class="section-title">
+                💧 Smart Irrigation Advice
+            </h2>
+
+            <div class="advice-card">
+
+                <h3>
+                    {{ irrigation_advice.icon }}
+                    {{ irrigation_advice.title }}
+                </h3>
+
+                <p>
+                    {{ irrigation_advice.message }}
+                </p>
+
+            </div>
+        </section>
+
+        {% endif %}
+
+        <p class="muted" style="text-align: center; margin: 25px 0;">
+            Weather forecast is an estimate. Actual conditions may vary.
+            Check local advisories before making farming decisions.
+        </p>
+
+    </main>
+
+    {% endif %}
+
+    <footer class="footer">
+        <p>
+            © 2026 KrishiOrbit | Smart Farming, Better Future 🌱
+        </p>
+    </footer>
+
+</body>
+</html>

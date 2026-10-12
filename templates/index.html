@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>KrishiOrbit | Kisan Ka Digital Saathi</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+
+    <a href="/" class="logo">
+        🌱 Krishi<span>Orbit</span>
+        <small data-i18n="tagline">Kisan Ka Digital Saathi</small>
+    </a>
+
+    <div class="nav-links">
+        <a class="active" href="/" data-i18n="home">⌂ Home</a>
+        <a href="/crops" data-i18n="cropGuide">🌱 Crop Guide</a>
+        <a href="/weather" data-i18n="weather">☁ Weather</a>
+        <a href="/mandi" data-i18n="mandi">▥ Mandi Bhav</a>
+        <a href="/calculator" data-i18n="calculator">▦ Calculator</a>
+        <a href="/yojana">Kisan Yojana</a>
+    </div>
+
+    <div class="language-control">
+        <label for="languageSelector" data-i18n="language">🌐 Language:</label>
+
+        <select id="languageSelector" onchange="changeLanguage(this.value)">
+            <option value="en">🇬🇧 English</option>
+            <option value="hi">🇮🇳 हिंदी</option>
+            <option value="pa">🇮🇳 ਪੰਜਾਬੀ</option>
+            <option value="ur">🇵🇰 اردو</option>
+        </select>
+    </div>
+
+</nav>
+
+
+<!-- HERO SECTION -->
+<section class="hero">
+
+    <div class="hero-content">
+
+        <h1 data-i18n="heroTitle">
+            Smart Farming, Better Future 🌱
+        </h1>
+
+        <p data-i18n="heroDescription">
+           Accurate Farming Information, Weather Updates, and Agricultural Calculations — All in One Place.
+        </p>
+
+        <div class="hero-buttons">
+
+            <a href="/crops" class="btn primary-btn"
+               data-i18n="heroCropButton">
+                🌱 Crop Information →
+            </a>
+
+            <a href="/weather" class="btn secondary-btn"
+               data-i18n="heroWeatherButton">
+                ☁ Check Weather →
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="hero-quote">
+        <p data-i18n="heroQuote">
+            Kisan Badhega, Toh Desh Badhega
+        </p>
+        <span>🌾🌱</span>
+    </div>
+
+</section>
+
+
+<!-- STATISTICS -->
+<section class="stats container">
+
+    <div class="stat">
+        <span>👨‍🌾</span>
+        <div>
+            <h3 data-i18n="easyAccess">Easy Access</h3>
+            <p data-i18n="easyAccessDesc">Farming Information</p>
+        </div>
+    </div>
+
+    <div class="stat">
+        <span>🌱</span>
+        <div>
+            <h3 data-i18n="cropGuide">Crop Guide</h3>
+            <p data-i18n="cropCare">Crop Care</p>
+        </div>
+    </div>
+
+    <div class="stat">
+        <span>☁️</span>
+        <div>
+            <h3 data-i18n="weather">Weather</h3>
+            <p data-i18n="weatherUpdate">Weather Updates</p>
+        </div>
+    </div>
+
+    <div class="stat">
+        <span>📊</span>
+        <div>
+            <h3 data-i18n="mandi">Mandi price</h3>
+            <p data-i18n="marketInfo">Market information</p>
+        </div>
+    </div>
+
+</section>
+
+
+<!-- SERVICES -->
+<main class="container services-section">
+
+    <div class="section-heading">
+        <h2 data-i18n="ourServices">🌱 Our Services 🌱</h2>
+
+        <p data-i18n="servicesDescription">
+            Making farming easier, more informative, and profitable.
+        </p>
+    </div>
+
+    <div class="service-grid">
+
+        <!-- CROP GUIDE -->
+        <article class="service-card crop-card">
+
+            <div class="service-image crop-image">
+                🌱
+            </div>
+
+            <div class="service-content">
+
+                <h3 data-i18n="cropGuide">Crop Guide</h3>
+
+                <p data-i18n="cropDescription">
+                    Faslon ke season, beej, khaad aur rog-nidan ki basic jaankari.
+                </p>
+
+                <a href="/crops" class="service-btn green-btn"
+                   data-i18n="explore">
+                    Explore →
+                </a>
+
+            </div>
+
+        </article>
+
+
+        <!-- WEATHER -->
+        <article class="service-card weather-card">
+
+            <div class="service-image weather-image">
+                ☀️
+            </div>
+
+            <div class="service-content">
+
+                <h3 data-i18n="weather">Weather</h3>
+
+                <p data-i18n="weatherDescription">
+                    Apne gaon ya najdeeki shehar ka current weather
+                    aur temperature check karein.
+                </p>
+
+                <a href="/weather" class="service-btn blue-btn"
+                   data-i18n="checkWeather">
+                    Check Weather →
+                </a>
+
+            </div>
+
+        </article>
+
+
+        <!-- MANDI -->
+        <article class="service-card mandi-card">
+
+            <div class="service-image mandi-image">
+                🌾
+            </div>
+
+            <div class="service-content">
+
+                <h3 data-i18n="mandi">Mandi price</h3>
+
+                <p data-i18n="mandiDescription">
+                    Fasal ke mandi prices aur market information dekhein.
+                </p>
+
+                <a href="/mandi" class="service-btn orange-btn"
+                   data-i18n="viewPrices">
+                    View Prices →
+                </a>
+
+            </div>
+
+        </article>
+
+
+        <!-- CALCULATOR -->
+        <article class="service-card calculator-card">
+
+            <div class="service-image calculator-image">
+                🧮
+            </div>
+
+            <div class="service-content">
+
+                <h3 data-i18n="farmingCalculator">Farming Calculator</h3>
+
+                <p data-i18n="calculatorDescription">
+                    Beej ki quantity aur estimated seed cost calculate karein.
+                </p>
+
+                <a href="/calculator" class="service-btn purple-btn"
+                   data-i18n="calculate">
+                    Calculate →
+                </a>
+
+            </div>
+
+        </article>
+        
+        <!-- CROP DISEASE ADVISORY -->
+<article class="service-card disease-card">
+
+    <div class="service-image disease-image">
+        🌿
+    </div>
+
+    <div class="service-content">
+
+        <h3>Crop Disease Advisory</h3>
+
+        <p>
+            Fasal mein hone wale rogon ke lakshan jaanein
+            aur bachav ke upay dekhein.
+        </p>
+
+        <a href="{{ url_for('disease_advisory') }}"
+           class="service-btn disease-btn">
+            Check Crop Health →
+        </a>
+
+    </div>
+
+</article>
+
+    </div>
+
+</main>
+
+
+<!-- FOOTER -->
+<footer class="footer">
+
+    <div class="footer-item">
+        <span>💡</span>
+        <div>
+            <strong data-i18n="rightInformation">Sahi Jaankari</strong>
+            <p data-i18n="trustedData">Vishwasniya sources se data</p>
+        </div>
+    </div>
+
+    <div class="footer-item">
+        <span>📊</span>
+        <div>
+            <strong data-i18n="betterDecisions">Behtar Nirnay</strong>
+            <p data-i18n="farmingDecisions">
+                Data ke aadhar par kheti ke nirnay
+            </p>
+        </div>
+    </div>
+
+    <div class="footer-item">
+        <span>🌿</span>
+        <div>
+            <strong data-i18n="brightFuture">Ujjwal Bhavishya</strong>
+            <p data-i18n="betterTomorrow">
+                Smart farming se behtar kal
+            </p>
+        </div>
+    </div>
+
+</footer>
+
+
+<script src="{{ url_for('static', filename='language.js') }}"></script>
+
+</body>
+</html>

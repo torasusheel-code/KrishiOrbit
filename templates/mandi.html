@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mandi Bhav | KrishiOrbit</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='mandi.css') }}">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a class="logo" href="/">🌾 KrishiOrbit</a>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/crops">Crop Guide</a>
+        <a href="/weather">Weather</a>
+        <a href="/mandi" class="active">Mandi Bhav</a>
+        <a href="/calculator">Calculator</a>
+    </div>
+</nav>
+
+
+<!-- HERO SECTION -->
+<header class="mandi-hero">
+
+    <div class="hero-content">
+
+        <span class="hero-badge">
+            🌱 SMART FARMING TOOLS
+        </span>
+
+        <h1>Indian Mandi Bhav</h1>
+
+        <p>
+            Find available agricultural commodity prices
+            by crop, state, district and mandi.
+        </p>
+
+        <div class="hero-tags">
+            <span>🌾 Crop Prices</span>
+            <span>📍 All India Search</span>
+            <span>💰 Price per Quintal</span>
+        </div>
+
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+        <div class="sun"></div>
+        <div class="hero-hill hill-one"></div>
+        <div class="hero-hill hill-two"></div>
+        <span class="hero-wheat wheat-one">🌾</span>
+        <span class="hero-wheat wheat-two">🌾</span>
+    </div>
+
+</header>
+
+
+<main class="mandi-container">
+
+    <!-- PAGE HEADING -->
+    <section class="section-heading">
+
+        <div>
+            <span class="section-kicker">AGRICULTURAL MARKET</span>
+            <h2>Search Mandi Prices</h2>
+
+            <p>
+                Select a crop and location to find available market prices.
+            </p>
+        </div>
+
+        <div class="heading-icon">💹</div>
+
+    </section>
+
+
+    <!-- ERROR MESSAGE -->
+  {% if error %}
+<div class="notice">
+    <strong>⚠️ Notice</strong>
+    <p>{{ error }}</p>
+</div>
+{% endif %}
+
+
+    <!-- SEARCH FORM -->
+    <section class="search-panel">
+
+        <div class="search-title">
+            <div class="search-title-icon">🔎</div>
+
+            <div>
+                <h2>Find Your Crop Price</h2>
+                <p>Enter one or more search filters below.</p>
+            </div>
+        </div>
+
+
+        <form action="{{ url_for('mandi') }}"
+              method="GET"
+              class="mandi-search-form">
+
+            <!-- CROP -->
+            <div class="form-group">
+
+                <label for="commodity">🌾 Crop / Commodity</label>
+
+                <input
+                    type="text"
+                    id="commodity"
+                    name="commodity"
+                    value="{{ commodity or '' }}"
+                    placeholder="e.g. Wheat, Rice, Tomato"
+                    list="crop-options"
+                >
+
+                <datalist id="crop-options">
+                    <option value="Wheat">
+                    <option value="Rice">
+                    <option value="Maize">
+                    <option value="Tomato">
+                    <option value="Potato">
+                    <option value="Onion">
+                    <option value="Mustard">
+                    <option value="Soyabean">
+                    <option value="Apple">
+                    <option value="Gram">
+                    <option value="Cotton">
+                </datalist>
+
+            </div>
+
+
+            <!-- STATE -->
+            <div class="form-group">
+
+                <label for="state">📍 State</label>
+
+                <input
+                    type="text"
+                    id="state"
+                    name="state"
+                    value="{{ state or '' }}"
+                    placeholder="e.g. Himachal Pradesh"
+                    list="state-options"
+                >
+
+                <datalist id="state-options">
+                    <option value="Himachal Pradesh">
+                    <option value="Punjab">
+                    <option value="Haryana">
+                    <option value="Uttar Pradesh">
+                    <option value="Rajasthan">
+                    <option value="Madhya Pradesh">
+                    <option value="Maharashtra">
+                    <option value="Gujarat">
+                    <option value="Bihar">
+                    <option value="Uttarakhand">
+                    <option value="Delhi">
+                    <option value="Karnataka">
+                    <option value="Tamil Nadu">
+                    <option value="West Bengal">
+                    <option value="Andhra Pradesh">
+                    <option value="Telangana">
+                    <option value="Kerala">
+                    <option value="Odisha">
+                    <option value="Assam">
+                    <option value="Jharkhand">
+                    <option value="Chhattisgarh">
+                </datalist>
+
+            </div>
+
+
+            <!-- DISTRICT -->
+            <div class="form-group">
+
+                <label for="district">🏙️ District</label>
+
+                <input
+                    type="text"
+                    id="district"
+                    name="district"
+                    value="{{ district or '' }}"
+                    placeholder="e.g. Shimla, Kangra"
+                >
+
+            </div>
+
+
+            <!-- MANDI -->
+            <div class="form-group">
+
+                <label for="market">🏪 Mandi / Market</label>
+
+                <input
+                    type="text"
+                    id="market"
+                    name="market"
+                    value="{{ market or '' }}"
+                    placeholder="Enter mandi name"
+                >
+
+            </div>
+
+
+            <!-- BUTTONS -->
+            <div class="search-buttons">
+
+                <button type="submit" class="search-btn">
+                    🔍 Search Prices
+                </button>
+
+                <a href="{{ url_for('mandi') }}"
+                   class="clear-btn">
+                    ✖ Clear Filters
+                </a>
+
+            </div>
+
+        </form>
+
+        <div class="search-help">
+            💡 Tip: You can search using just a crop name,
+            just a state, or combine multiple filters.
+        </div>
+
+    </section>
+
+
+    <!-- PRICE RESULTS -->
+    <section class="results-section">
+
+        <div class="results-heading">
+
+            <div>
+                <span class="section-kicker">MARKET RESULTS</span>
+                <h2>Available Mandi Prices</h2>
+            </div>
+
+            <a href="{{ url_for('mandi', **request.args) }}"
+               class="refresh-btn">
+                🔄 Refresh Prices
+            </a>
+
+        </div>
+
+
+        <div class="data-notice">
+            <span>ℹ️</span>
+
+            <p>
+                Prices are shown according to the data returned by
+                the government API. Rates may differ by market,
+                commodity variety and arrival date.
+                Data availability and update frequency depend on
+                the official source.
+            </p>
+        </div>
+
+
+        {% if prices %}
+
+        <div class="price-grid">
+
+            {% for item in prices %}
+
+            <article class="price-card">
+
+                <div class="price-card-top">
+
+                    <div class="crop-icon">
+                        {% set crop_name = item.crop|lower %}
+
+                        {% if 'wheat' in crop_name %}
+                            🌾
+                        {% elif 'rice' in crop_name or 'paddy' in crop_name %}
+                            🌾
+                        {% elif 'maize' in crop_name or 'corn' in crop_name %}
+                            🌽
+                        {% elif 'tomato' in crop_name %}
+                            🍅
+                        {% elif 'potato' in crop_name %}
+                            🥔
+                        {% elif 'onion' in crop_name %}
+                            🧅
+                        {% elif 'apple' in crop_name %}
+                            🍎
+                        {% elif 'banana' in crop_name %}
+                            🍌
+                        {% else %}
+                            🌱
+                        {% endif %}
+                    </div>
+
+                    <span class="live-badge">
+                        GOVERNMENT DATA
+                    </span>
+
+                </div>
+
+
+                <div class="crop-details">
+
+                    <span class="crop-label">COMMODITY</span>
+
+                    <h3>{{ item.crop }}</h3>
+
+                    {% if item.variety %}
+                    <p class="variety">
+                        Variety: {{ item.variety }}
+                    </p>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="location-details">
+
+                    <p>
+                        <span>📍</span>
+                        <strong>State:</strong>
+                        {{ item.state or 'Not available' }}
+                    </p>
+
+                    <p>
+                        <span>🏙️</span>
+                        <strong>District:</strong>
+                        {{ item.district or 'Not available' }}
+                    </p>
+
+                    <p>
+                        <span>🏪</span>
+                        <strong>Mandi:</strong>
+                        {{ item.market or 'Not available' }}
+                    </p>
+
+                </div>
+
+
+                <div class="price-box">
+
+                    <span class="price-label">Modal Price</span>
+
+                    <div class="price-value">
+                        ₹{{ item.price if item.price not in ['', None] else 'N/A' }}
+                    </div>
+
+                    <span class="price-unit">per quintal</span>
+
+                </div>
+
+
+                <div class="price-comparison">
+
+                    <div>
+                        <span>Minimum</span>
+
+                        <strong>
+                            ₹{{ item.min_price if item.min_price not in ['', None] else 'N/A' }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Maximum</span>
+
+                        <strong>
+                            ₹{{ item.max_price if item.max_price not in ['', None] else 'N/A' }}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="date-info">
+
+                    <span>📅 Arrival Date</span>
+
+                    <strong>
+                        {{ item.arrival_date or 'Not available' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="source-info">
+
+                    <span class="source-icon">📋</span>
+
+                    <div>
+                        <span>Data Source</span>
+                        <strong>{{ item.source }}</strong>
+                    </div>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">🌾</div>
+
+            <h3>No Mandi Prices to Display</h3>
+
+            <p>
+                Enter a crop or location above and click
+                <strong>Search Prices</strong>.
+                If no results appear, check your filters
+                or try again later.
+            </p>
+
+            <a href="{{ url_for('mandi') }}" class="search-btn">
+                View Available Data
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- FARMER TIP -->
+    <section class="market-tip">
+
+        <div class="tip-icon">💡</div>
+
+        <div>
+            <h3>Before Selling Your Crop</h3>
+
+            <p>
+                Check the latest available price from your local mandi.
+                Consider crop quality, transportation costs and
+                market conditions before making selling decisions.
+            </p>
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- FOOTER -->
+<footer class="footer">
+
+    <a href="/" class="footer-brand">🌾 KrishiOrbit</a>
+
+    <p>Smart farming starts with informed decisions.</p>
+
+    <small>© 2026 KrishiOrbit. All rights reserved.</small>
+
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Crop Disease Advisory | KrishiOrbit</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .disease-page {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .disease-header {
+            background: linear-gradient(120deg, #e8f5e9, #d1fae5);
+            text-align: center;
+            padding: 35px 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+        }
+
+        .disease-header h1 {
+            color: #087443;
+            margin-bottom: 12px;
+        }
+
+        .disease-header p {
+            color: #355b46;
+            line-height: 1.7;
+        }
+
+        .disease-form-card,
+        .disease-results {
+            background: #ffffff;
+            border: 1px solid #d5e8d5;
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
+        }
+
+        .disease-form-card label {
+            display: block;
+            margin: 15px 0 8px;
+            font-weight: 600;
+            color: #245b3c;
+        }
+
+        .disease-form-card select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #b9d8bd;
+            border-radius: 8px;
+            background: #ffffff;
+            box-sizing: border-box;
+        }
+
+        .disease-button {
+            display: block;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            background: #138047;
+            color: white;
+            padding: 13px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .disease-button:hover {
+            background: #086634;
+        }
+
+        .disease-results h2 {
+            color: #087443;
+        }
+
+        .disease-result-card {
+            border-left: 5px solid #22a447;
+            background: #f6fcf6;
+            padding: 18px;
+            border-radius: 8px;
+            margin-top: 15px;
+            overflow-wrap: anywhere;
+        }
+
+        .disease-result-card h3 {
+            color: #166534;
+        }
+
+        .verified-status {
+            color: #15803d;
+            font-weight: bold;
+        }
+
+        .unverified-status {
+            color: #a16207;
+            font-weight: bold;
+        }
+
+        .disease-notice {
+            background: #fff7df;
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.7;
+        }
+
+        .disease-disclaimer {
+            background: #fff4d9;
+            padding: 18px;
+            border-radius: 10px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .back-home {
+            display: inline-block;
+            margin: 0 0 25px;
+            color: #087443;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .disease-page {
+                padding: 0 12px;
+            }
+
+            .disease-header h1 {
+                font-size: 26px;
+            }
+
+            .disease-form-card,
+            .disease-results {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="disease-page">
+
+    <!-- Page Header -->
+    <header class="disease-header">
+
+        <h1>🌿 Crop Disease Advisory</h1>
+
+        <p>
+            Check possible crop health problems and explore preventive
+            guidance based on crop symptoms.
+        </p>
+
+    </header>
+
+    <!-- Symptom-Based Advisory -->
+    <section class="disease-form-card">
+
+        <h2>🌱 Check Crop Symptoms</h2>
+
+        <p>
+            Select your crop and describe the symptoms to find
+            available agricultural guidance.
+        </p>
+
+        <form method="POST"
+              action="{{ url_for('disease_advisory') }}">
+
+            <label for="crop">Select Crop</label>
+
+            <select id="crop" name="crop" required>
+
+                <option value="">Choose a crop</option>
+
+                {% for crop in [
+                    "Wheat",
+                    "Rice",
+                    "Maize",
+                    "Mustard",
+                    "Tomato"
+                ] %}
+
+                <option value="{{ crop }}"
+                    {% if selected_crop == crop %}selected{% endif %}>
+                    {{ crop }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <label for="symptom">Select Symptom</label>
+
+            <select id="symptom" name="symptom" required>
+
+                <option value="">Choose a symptom</option>
+
+                {% for symptom in [
+                    "spots",
+                    "yellowing",
+                    "wilting",
+                    "drying"
+                ] %}
+
+                <option value="{{ symptom }}"
+                    {% if selected_symptom == symptom %}selected{% endif %}>
+                    {{ symptom|title }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <button type="submit" class="disease-button">
+                Check Crop Health
+            </button>
+
+        </form>
+
+    </section>
+
+    <!-- Advisory Results -->
+    <section class="disease-results">
+
+        <h2>🔍 Advisory Results</h2>
+
+        {% if results %}
+
+            {% for item in results %}
+
+            <article class="disease-result-card">
+
+                <h3>{{ item.disease_name }}</h3>
+
+                {% if item.verified == 1 %}
+
+                    <p class="verified-status">
+                        ✅ Verified Advisory
+                    </p>
+
+                {% else %}
+
+                    <p class="unverified-status">
+                        ⚠️ Preliminary Reference — Not Locally Verified
+                    </p>
+
+                {% endif %}
+
+                <p>
+                    <strong>Symptoms:</strong>
+                    {{ item.symptoms }}
+                </p>
+
+                <p>
+                    <strong>Prevention:</strong>
+                    {{ item.prevention }}
+                </p>
+
+                {% if item.source %}
+
+                <p>
+                    <strong>Reference:</strong>
+
+                    <a href="{{ item.source }}"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        View Source
+                    </a>
+                </p>
+
+                {% endif %}
+
+            </article>
+
+            {% endfor %}
+
+        {% elif selected_crop and selected_symptom %}
+
+            <p class="disease-notice">
+                No matching advisory is available for this selection.
+                Please consult a qualified agricultural expert.
+            </p>
+
+        {% else %}
+
+            <p>
+                Select a crop and symptom to check available guidance.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+    <!-- Important Disclaimer -->
+    <aside class="disease-disclaimer">
+
+        <strong>Important Agricultural Safety Notice</strong>
+
+        <p>
+            Similar symptoms can have different causes, including
+            disease, pests, nutrient deficiencies, and environmental
+            stress. The advisory may not identify the exact cause.
+            Consult a qualified agricultural expert before applying
+            pesticides or other treatments.
+        </p>
+
+    </aside>
+
+    <!-- Back to Home -->
+    <a href="{{ url_for('home') }}" class="back-home">
+        ← Back to Home
+    </a>
+
+</main>
+
+</body>
+</html>

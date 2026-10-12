@@ -1,0 +1,1753 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f8f1;
+    color: #194d34;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* NAVBAR */
+.navbar {
+    min-height: 65px;
+    padding: 10px 6%;
+    background: linear-gradient(90deg, #105b40, #08734a);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.logo span {
+    color: #b6e58a;
+}
+
+.logo small {
+    display: block;
+    font-size: 11px;
+    font-weight: normal;
+    margin-left: 38px;
+}
+
+.nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-links a {
+    color: white;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 7px;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    background: #277d40;
+}
+
+/* HERO */
+.hero {
+    min-height: 300px;
+    padding: 40px 10%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+
+    background-image:
+        linear-gradient(
+            90deg,
+            rgba(232, 244, 221, 0.94) 0%,
+            rgba(255, 244, 217, 0.55) 50%,
+            rgba(255, 244, 217, 0.10) 100%
+        ),
+        url("/static/images/hero-farming.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content {
+    max-width: 560px;
+    position: relative;
+    z-index: 1;
+    color: #10583e;
+}
+
+.hero h1 {
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.12;
+    margin: 0 0 15px;
+    color: #10583e;
+}
+
+.hero-content p {
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 13px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.primary-btn {
+    background: #116b3c;
+    color: white;
+}
+
+.secondary-btn {
+    background: white;
+    color: #116b3c;
+    border: 1px solid #116b3c;
+}
+
+.btn:hover,
+.service-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(0.95);
+}
+
+/* HERO QUOTE */
+.hero-quote {
+    width: 280px;
+    min-height: 190px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 50% 10% 50% 10%;
+    background: linear-gradient(135deg, #c4df9b, #f5e8b5);
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.hero-quote p {
+    font-size: 24px;
+    line-height: 1.4;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.hero-quote span {
+    font-size: 35px;
+}
+
+/* COMMON CONTAINER */
+.container {
+    width: 92%;
+    max-width: 1250px;
+    margin: auto;
+}
+
+/* STATISTICS */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    background: #e1f2df;
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: -12px;
+    position: relative;
+    z-index: 2;
+}
+
+.stat {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    border-right: 1px solid #b9d9b7;
+}
+
+.stat:last-child {
+    border-right: none;
+}
+
+.stat > span {
+    font-size: 27px;
+}
+
+.stat h3 {
+    margin: 0;
+    font-size: 17px;
+    color: #145d38;
+}
+
+.stat p {
+    margin: 3px 0 0;
+    font-size: 12px;
+}
+
+/* SERVICES */
+.services-section {
+    padding-top: 25px;
+    padding-bottom: 35px;
+}
+
+.section-heading {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.section-heading h2 {
+    font-size: 30px;
+    margin: 0 0 7px;
+    color: #145d38;
+}
+
+.section-heading p {
+    margin: 0;
+    color: #5c7766;
+}
+
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.service-card {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(25, 75, 40, 0.09);
+    border: 1px solid #e2ece0;
+    transition: transform 0.2s;
+}
+
+.service-card:hover {
+    transform: translateY(-4px);
+}
+
+.service-image {
+    height: 115px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 58px;
+}
+
+.crop-image {
+    background: linear-gradient(135deg, #b5db7c, #edf4c6);
+}
+
+.weather-image {
+    background: linear-gradient(135deg, #a7dfff, #e3f5ff);
+}
+
+.mandi-image {
+    background: linear-gradient(135deg, #ffe1a4, #fff3d8);
+}
+
+.calculator-image {
+    background: linear-gradient(135deg, #d9c8ff, #f1eaff);
+}
+
+.service-content {
+    padding: 17px;
+}
+
+.service-content h3 {
+    margin: 0 0 8px;
+    color: #176b3a;
+    font-size: 19px;
+}
+
+.weather-card h3 {
+    color: #087ed0;
+}
+
+.mandi-card h3 {
+    color: #e87808;
+}
+
+.calculator-card h3 {
+    color: #7950c8;
+}
+
+.service-content p {
+    min-height: 65px;
+    margin: 0 0 15px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #4b6153;
+}
+
+.service-btn {
+    display: inline-block;
+    padding: 11px 16px;
+    border-radius: 7px;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.green-btn {
+    background: #176b3a;
+}
+
+.blue-btn {
+    background: #087ed0;
+}
+
+.orange-btn {
+    background: #ed7908;
+}
+
+.purple-btn {
+    background: #7950c8;
+}
+
+/* FOOTER */
+.footer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 25px;
+    padding: 24px 6%;
+    background: linear-gradient(90deg, #105b40, #08734a);
+    color: white;
+}
+
+.footer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.footer-item > span {
+    font-size: 27px;
+}
+
+.footer-item strong {
+    font-size: 15px;
+}
+
+.footer-item p {
+    font-size: 12px;
+    margin: 3px 0 0;
+    color: #d4e9d6;
+}
+
+/* TABLET */
+@media (max-width: 900px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .nav-links {
+        width: 100%;
+    }
+
+    .hero {
+        padding: 35px 5%;
+    }
+
+    .hero-quote {
+        width: 220px;
+    }
+
+    .service-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat:nth-child(2) {
+        border-right: none;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .navbar {
+        padding: 15px 5%;
+    }
+
+    .nav-links {
+        gap: 5px;
+    }
+
+    .nav-links a {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    .hero-quote {
+        width: 100%;
+        min-height: 140px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr 1fr;
+        padding: 15px 8px;
+    }
+
+    .stat {
+        justify-content: flex-start;
+        padding: 8px;
+    }
+
+    .stat h3 {
+        font-size: 14px;
+    }
+
+    .stat p {
+        font-size: 11px;
+    }
+
+    .service-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-heading h2 {
+        font-size: 25px;
+    }
+
+    .footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+/* CROP SEARCH BAR */
+
+.crop-search {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px auto;
+    gap: 12px;
+    align-items: center;
+
+    padding: 16px;
+    margin-bottom: 18px;
+
+    background: white;
+    border: 1px solid #e0ebe0;
+    border-radius: 12px;
+
+    box-shadow: 0 4px 12px rgba(30, 80, 45, 0.06);
+}
+
+.crop-search input,
+.crop-search select {
+    width: 100%;
+    min-width: 0;
+
+    padding: 12px;
+    margin: 0;
+
+    border: 1px solid #cbdccb;
+    border-radius: 8px;
+
+    background: white;
+    font-size: 14px;
+}
+
+.crop-search input:focus,
+.crop-search select:focus {
+    outline: 2px solid #b6dfbd;
+    border-color: #176b3a;
+}
+
+.crop-search button {
+    width: auto;
+    padding: 12px 17px;
+    margin: 0;
+
+    background: #176b3a;
+    color: white;
+
+    border: none;
+    border-radius: 8px;
+
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.crop-search button:hover {
+    background: #10532c;
+}
+
+.crop-count {
+    color: #176b3a;
+    font-size: 14px;
+    margin: 0 0 12px;
+}
+
+.no-crops {
+    text-align: center;
+    padding: 25px;
+    color: #6a756c;
+    background: white;
+    border-radius: 10px;
+}
+
+.crop-card[hidden],
+.crop-grid[hidden],
+.no-crops[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 600px) {
+
+    .crop-search {
+        grid-template-columns: 1fr;
+    }
+
+    .crop-search button {
+        width: 100%;
+    }
+
+}
+/* ===== CROP GUIDE FIX ===== */
+
+.crop-page {
+    margin: 0;
+    background: #f3f8f2;
+    color: #194d34;
+}
+
+.crop-container {
+    width: 92%;
+    max-width: 1150px;
+    margin: 25px auto;
+}
+
+/* Search bar */
+.crop-search {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px auto;
+    gap: 12px;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.crop-search input,
+.crop-search select {
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    margin: 0;
+    border: 1px solid #cbdccb;
+    border-radius: 8px;
+}
+
+.crop-search button {
+    width: auto;
+    padding: 12px 18px;
+    margin: 0;
+    background: #176b3a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Crop grid */
+.crop-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 17px;
+    align-items: stretch;
+}
+
+/* Individual card */
+.crop-card {
+    min-width: 0;
+    padding: 8px;
+    overflow: hidden;
+    background: white;
+    border: 1px solid #e2ece2;
+    border-radius: 13px;
+    box-shadow: 0 4px 15px rgba(30, 80, 45, 0.08);
+}
+
+.crop-card[hidden] {
+    display: none !important;
+}
+
+/* Crop image */
+.crop-image {
+    width: 100%;
+    height: 125px;
+    overflow: hidden;
+    border-radius: 9px;
+    background: #e3efdc;
+}
+
+.crop-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Crop title */
+.crop-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: -17px 8px 10px;
+    position: relative;
+}
+
+.crop-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: white;
+    border: 2px solid #e6f0e5;
+    border-radius: 50%;
+    font-size: 23px;
+}
+
+.crop-title h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #176b3a;
+}
+
+/* Season and duration */
+.crop-details {
+    display: grid;
+    gap: 4px;
+    margin: 0 5px 9px;
+}
+
+.crop-details p {
+    display: grid;
+    grid-template-columns: 20px minmax(100px, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 5px;
+    padding: 7px;
+    margin: 0;
+    background: #f0f7f0;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.crop-details p > span:first-child {
+    color: #16834b;
+}
+
+.crop-details strong {
+    font-size: 11px;
+}
+
+.crop-details p > span:last-child {
+    overflow-wrap: anywhere;
+}
+
+/* Description */
+.crop-description {
+    min-height: 43px;
+    margin: 10px 5px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #4c6253;
+}
+
+/* Read More */
+.crop-card .read-more-btn {
+    display: inline-block;
+    width: auto;
+    padding: 10px 17px;
+    margin: 3px 5px 5px;
+    background: #116b3c;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.crop-card .read-more-btn:hover {
+    background: #0b502c;
+}
+
+/* Note */
+.crop-note {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: #e0f0e2;
+    border-radius: 10px;
+    color: #315d43;
+    font-size: 13px;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+    .crop-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .crop-grid,
+    .crop-search {
+        grid-template-columns: 1fr;
+    }
+
+    .crop-image {
+        height: 170px;
+    }
+}
+
+/* LANGUAGE SELECTOR */
+
+.language-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 10px;
+}
+
+.language-control label {
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.language-control select {
+    width: auto;
+    min-width: 125px;
+    padding: 9px 12px;
+    margin: 0;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    background: white;
+    color: #145b3a;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .language-control {
+        margin: 8px 0;
+    }
+}
+
+/* ==========================================
+   KRISHIORBIT - CROP GUIDE
+========================================== */
+
+.crop-navbar,
+.crop-hero,
+.crop-container,
+.crop-footer,
+.crop-modal {
+    box-sizing: border-box;
+}
+
+.crop-navbar {
+    width: 100%;
+    min-height: 65px;
+    padding: 12px 5%;
+    background: #086744;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.crop-logo {
+    color: white;
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.crop-nav-links {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.crop-nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.crop-nav-links a:hover,
+.crop-nav-links a.active {
+    color: #d8ff92;
+}
+
+.language-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+}
+
+.language-box select {
+    padding: 8px;
+    border-radius: 7px;
+    border: none;
+}
+
+
+/* HERO */
+
+.crop-hero {
+    padding: 55px 7%;
+    background: linear-gradient(120deg, #e3f5df, #f5faee);
+}
+
+.crop-hero-content {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.hero-label {
+    display: inline-block;
+    background: #d1edc7;
+    color: #12683b;
+    padding: 8px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.crop-hero h1 {
+    color: #105f36;
+    font-size: clamp(30px, 4vw, 46px);
+    margin: 18px 0 12px;
+}
+
+.crop-hero p {
+    max-width: 650px;
+    color: #52665a;
+    line-height: 1.8;
+}
+
+.hero-highlights {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+    color: #17673d;
+    font-weight: 600;
+}
+
+
+/* MAIN CONTAINER */
+
+.crop-container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 35px auto 50px;
+}
+
+
+/* SEARCH TOOLBAR */
+
+.crop-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 15px;
+    background: white;
+    border: 1px solid #e4ece3;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(25, 70, 40, 0.08);
+    margin-bottom: 20px;
+}
+
+.crop-toolbar input {
+    flex: 1;
+    min-width: 100px;
+    padding: 13px 15px;
+    border: 1px solid #cbdccf;
+    border-radius: 7px;
+    outline: none;
+}
+
+.crop-toolbar input:focus {
+    border-color: #17804b;
+    box-shadow: 0 0 0 3px rgba(23, 128, 75, 0.1);
+}
+
+.crop-toolbar select {
+    padding: 13px;
+    border: 1px solid #cbdccf;
+    border-radius: 7px;
+    background: white;
+}
+
+.clear-btn {
+    background: #126d40;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 13px 18px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.clear-btn:hover {
+    background: #084b2a;
+}
+
+
+/* RESULT COUNT */
+
+.crop-count {
+    color: #54715d;
+    font-size: 14px;
+    margin: 15px 0;
+}
+
+.no-crops {
+    text-align: center;
+    padding: 30px;
+    color: #52745c;
+    background: white;
+    border-radius: 10px;
+}
+
+
+/* CROP GRID */
+
+.crop-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    align-items: stretch;
+}
+
+.crop-card {
+    min-width: 0;
+    overflow: hidden;
+    background: white;
+    border: 1px solid #e2ebe0;
+    border-radius: 14px;
+    box-shadow: 0 5px 18px rgba(20, 70, 35, 0.07);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.crop-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(20, 70, 35, 0.13);
+}
+
+.crop-card[hidden] {
+    display: none !important;
+}
+
+
+/* IMAGE */
+
+.crop-image {
+    height: 190px;
+    width: 100%;
+    overflow: hidden;
+    background: #e3f0df;
+}
+
+.crop-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.crop-image-placeholder {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    font-size: 55px;
+}
+
+
+/* CARD BODY */
+
+.crop-card-body {
+    padding: 20px;
+}
+
+.crop-card-body h2 {
+    margin: 0 0 18px;
+    color: #12683b;
+    font-size: 21px;
+}
+
+.crop-info-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 7px;
+    background: #f0f6ed;
+    font-size: 13px;
+}
+
+.crop-info-row span {
+    color: #52705a;
+}
+
+.crop-info-row strong {
+    color: #205b35;
+    text-align: right;
+}
+
+.crop-description {
+    color: #5c6b60;
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 48px;
+}
+
+.read-more-btn {
+    display: inline-block;
+    margin-top: 12px;
+    background: #14783f;
+    color: white;
+    padding: 11px 17px;
+    border: none;
+    border-radius: 7px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.read-more-btn:hover {
+    background: #0c562d;
+}
+
+
+/* MODAL */
+
+.crop-modal[hidden] {
+    display: none !important;
+}
+
+.crop-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: rgba(0, 30, 15, 0.65);
+}
+
+.crop-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 30px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+}
+
+.modal-icon {
+    font-size: 35px;
+}
+
+.crop-modal-content h2 {
+    color: #12683b;
+    margin: 10px 0 22px;
+}
+
+.crop-modal-content h3 {
+    margin-top: 25px;
+    color: #17683c;
+}
+
+.crop-modal-content p {
+    line-height: 1.8;
+    color: #526458;
+}
+
+.modal-detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 12px;
+    margin: 10px 0;
+    background: #f0f6ed;
+    border-radius: 7px;
+}
+
+.modal-close {
+    position: absolute;
+    right: 15px;
+    top: 12px;
+    font-size: 30px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.modal-done-btn {
+    padding: 11px 25px;
+    color: white;
+    background: #14783f;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+
+/* FOOTER */
+
+.crop-footer {
+    padding: 22px;
+    text-align: center;
+    color: white;
+    background: #086744;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1000px) {
+    .crop-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .crop-navbar {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 650px) {
+    .crop-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .crop-container {
+        width: 92%;
+    }
+
+    .crop-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .crop-toolbar input {
+        flex-basis: 100%;
+    }
+
+    .crop-toolbar select,
+    .crop-toolbar button {
+        flex: 1;
+    }
+
+    .crop-nav-links {
+        justify-content: center;
+    }
+
+    .crop-hero {
+        padding: 35px 5%;
+    }
+}
+
+/* SMART SOWING ADVISOR */
+
+.sowing-advisor {
+    margin-top: 25px;
+    padding: 20px;
+    background: #f0f8ed;
+    border: 1px solid #d6e8d0;
+    border-radius: 12px;
+}
+
+.sowing-advisor h3 {
+    color: #12683b;
+}
+
+.sowing-advisor label {
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.sowing-advisor select,
+.sowing-advisor input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px;
+    border: 1px solid #cbdccf;
+    border-radius: 7px;
+    background: white;
+}
+
+#sowingResult {
+    margin-top: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+}
+
+#sowingResult[hidden] {
+    display: none !important;
+}
+
+#sowingResult h4 {
+    color: #12683b;
+}
+
+#sowingResult p {
+    line-height: 1.7;
+}
+
+.weather-forecast {
+    margin-top: 20px;
+    padding: 18px;
+    background: #f0f8ed;
+    border: 1px solid #cce3c5;
+    border-radius: 12px;
+}
+
+.weather-forecast h4 {
+    color: #137843;
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+.forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.forecast-grid > div {
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+}
+
+.forecast-grid strong {
+    color: #28633f;
+    font-size: 14px;
+}
+
+.forecast-grid p {
+    margin-bottom: 0;
+    overflow-wrap: anywhere;
+}
+
+#weatherAdvice {
+    margin-top: 16px;
+    line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+    .forecast-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* ================= 7-DAY FORECAST CARDS ================= */
+
+.weather-forecast {
+    margin-top: 20px;
+    padding: 18px;
+    background: #f0f8ed;
+    border: 1px solid #cce3c5;
+    border-radius: 14px;
+}
+
+.weather-forecast h4 {
+    color: #137843;
+    margin: 0 0 16px;
+}
+
+.daily-forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.daily-forecast-card {
+    background: #ffffff;
+    border: 1px solid #e0eadc;
+    border-radius: 10px;
+    padding: 14px;
+    min-width: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.daily-forecast-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.daily-forecast-card h5 {
+    color: #137843;
+    font-size: 15px;
+    margin: 0 0 12px;
+}
+
+.daily-forecast-card p {
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 8px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.weather-advice {
+    margin: 16px 0 0;
+    line-height: 1.7;
+    color: #355642;
+}
+
+@media (max-width: 480px) {
+    .daily-forecast-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* ================= RAIN ALERT SYSTEM ================= */
+
+.rain-alert-badge {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.rain-high {
+    background: #fde8e7;
+    color: #a51d1d;
+    border: 1px solid #f5b7b1;
+}
+
+.rain-medium {
+    background: #fff2d6;
+    color: #875900;
+    border: 1px solid #f0d28a;
+}
+
+.rain-low {
+    background: #e3f5e8;
+    color: #176b37;
+    border: 1px solid #b8e0c2;
+}
+
+.daily-forecast-card .rain-alert-badge {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+/* Improve weather forecast card layout */
+
+.daily-forecast-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.daily-forecast-card h5 {
+    order: 1;
+    margin: 0 0 4px;
+}
+
+.daily-forecast-card p {
+    order: 2;
+    margin: 0;
+}
+
+.daily-forecast-card .rain-alert-badge {
+    order: 3;
+    margin-top: 4px;
+    align-self: flex-start;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* ================= SMART FARMING ADVICE ================= */
+
+.smart-farming-advice {
+    margin-top: 20px;
+    padding: 18px;
+    background: #f0f8ed;
+    border: 1px solid #cce3c5;
+    border-radius: 14px;
+}
+
+.smart-farming-advice h4 {
+    color: #137843;
+    margin: 0 0 16px;
+}
+
+.farming-advice-card {
+    background: #ffffff;
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    border: 1px solid #e0eadc;
+}
+
+.farming-advice-card h5 {
+    margin: 0 0 8px;
+    color: #176b37;
+    font-size: 15px;
+}
+
+.farming-advice-card p {
+    margin: 0;
+    line-height: 1.7;
+    color: #355642;
+}
+
+.farming-note {
+    margin: 14px 0 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #52665a;
+}
+
+@media (max-width: 480px) {
+    .smart-farming-advice {
+        padding: 12px;
+    }
+}
+/* ================= CROP DISEASE ADVISORY ================= */
+
+.disease-page {
+    max-width: 850px;
+    margin: 30px auto;
+    padding: 20px;
+    color: #294735;
+}
+
+.disease-header {
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    background: #eaf6e7;
+    text-align: center;
+}
+
+.disease-header h1 {
+    color: #137843;
+    margin-top: 0;
+}
+
+.disease-header p {
+    line-height: 1.7;
+}
+
+.disease-form-card,
+.disease-result-card {
+    padding: 22px;
+    margin-bottom: 18px;
+    background: #ffffff;
+    border: 1px solid #d8e8d2;
+    border-radius: 13px;
+}
+
+.disease-form-card label {
+    display: block;
+    margin: 14px 0 7px;
+    font-weight: 600;
+}
+
+.disease-form-card select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #c8dac4;
+    border-radius: 8px;
+    background: white;
+    font-size: 15px;
+}
+
+.disease-form-card button {
+    width: 100%;
+    padding: 13px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 8px;
+    background: #137843;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.disease-form-card button:hover {
+    background: #0e6034;
+}
+
+.disease-results h2 {
+    color: #137843;
+}
+
+.disease-result-card h3 {
+    color: #137843;
+}
+
+.disease-result-card p {
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.disease-notice {
+    padding: 16px;
+    border-radius: 9px;
+    background: #fff4dc;
+    line-height: 1.7;
+}
+
+.disease-disclaimer {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 10px;
+    background: #fff4dc;
+    line-height: 1.7;
+}
+
+.back-home {
+    display: inline-block;
+    margin-top: 20px;
+    color: #137843;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+@media (max-width: 600px) {
+    .disease-page {
+        margin: 10px auto;
+        padding: 12px;
+    }
+
+    .disease-header,
+    .disease-form-card,
+    .disease-result-card {
+        padding: 16px;
+    }
+}
+/* CROP DISEASE ADVISORY CARD */
+
+.disease-card {
+    border: 1px solid #d8ead6;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.disease-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 22px rgba(19, 120, 67, 0.12);
+}
+
+.disease-image {
+    background: #e5f5e7;
+    color: #137843;
+}
+
+.disease-btn {
+    background: #137843;
+    color: #ffffff;
+}
+
+.disease-btn:hover {
+    background: #0e6034;
+}
+
+/* ===== CROP GUIDE HERO BACKGROUND ===== */
+
+.crop-hero {
+    position: relative;
+    min-height: 280px;
+    padding: 55px 30px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(235, 248, 229, 0.94),
+            rgba(235, 248, 229, 0.72)
+        ),
+        url("/static/images/crop-bg.png");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    display: flex;
+    align-items: center;
+}
+
+/* Hero content */
+
+.crop-hero-content {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* Hero label */
+
+.crop-hero .hero-label {
+    display: inline-block;
+    background: rgba(100, 190, 90, 0.22);
+    color: #086b43;
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+/* Heading */
+
+.crop-hero h1 {
+    color: #086b43;
+    font-size: 42px;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+/* Description */
+
+.crop-hero p {
+    color: #294b38;
+    font-size: 15px;
+    line-height: 1.8;
+    max-width: 600px;
+}
+
+/* Highlights */
+
+.crop-hero .hero-highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 22px;
+    color: #086b43;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Mobile responsive */
+
+@media (max-width: 600px) {
+    .crop-hero {
+        padding: 35px 20px;
+        min-height: 250px;
+    }
+
+    .crop-hero h1 {
+        font-size: 32px;
+    }
+
+    .crop-hero .hero-highlights {
+        gap: 12px;
+        font-size: 12px;
+    }
+}
+/*   weather page */
+.farming-advice {
+    margin-top: 30px;
+    padding: 24px;
+    background: #eaf6e5;
+    border: 1px solid #cde5c6;
+    border-radius: 18px;
+}
+
+.farming-advice h2 {
+    color: #086b43;
+    margin-top: 0;
+}
+
+.advice-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 12px 0;
+    padding: 15px;
+    background: white;
+    border-radius: 12px;
+}
+
+.advice-card p {
+    margin: 0;
+    line-height: 1.7;
+}
+
+.advice-note {
+    color: #617567;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.forecast-description {
+    color: #087443;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 8px 0;
+    min-height: 18px;
+}

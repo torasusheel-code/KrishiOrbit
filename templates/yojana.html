@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Farmer Government Schemes | KrishiOrbit</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .yojana-hero {
+            background: linear-gradient(120deg, #14532d, #16a34a);
+            color: white;
+            text-align: center;
+            padding: 55px 20px;
+            border-radius: 0 0 25px 25px;
+        }
+
+        .yojana-hero h1 {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .yojana-hero p {
+            font-size: 17px;
+            max-width: 700px;
+            margin: auto;
+            line-height: 1.7;
+        }
+
+        .yojana-container {
+            max-width: 1150px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .yojana-heading {
+            text-align: center;
+            color: #166534;
+            margin-bottom: 25px;
+        }
+
+        .yojana-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .yojana-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.09);
+            border-top: 5px solid #22a447;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+        .yojana-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.13);
+        }
+
+        .yojana-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .yojana-card h3 {
+            color: #166534;
+            margin: 0 0 12px;
+            font-size: 21px;
+        }
+
+        .yojana-card p {
+            color: #555;
+            line-height: 1.7;
+            flex-grow: 1;
+        }
+
+        .yojana-btn {
+            display: inline-block;
+            text-align: center;
+            background: #15803d;
+            color: white;
+            text-decoration: none;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .yojana-btn:hover {
+            background: #166534;
+        }
+
+        .yojana-note {
+            margin-top: 30px;
+            background: #f0fdf4;
+            border-left: 5px solid #22a447;
+            padding: 20px;
+            border-radius: 10px;
+            line-height: 1.7;
+        }
+
+        .yojana-note a {
+            color: #166534;
+            font-weight: bold;
+        }
+
+        @media (max-width: 850px) {
+            .yojana-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 550px) {
+            .yojana-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .yojana-hero h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a class="logo" href="/">🌾 KrishiOrbit</a>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/crops">Crop Guide</a>
+            <a href="/weather">Weather</a>
+            <a href="/mandi">Market Prices</a>
+            <a href="/calculator">Calculator</a>
+            <a href="/yojana" class="active">Farmer Schemes</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="yojana-hero">
+        <h1>🌾 Farmer Government Schemes & Updates</h1>
+
+        <p>
+            Explore government schemes, agricultural assistance,
+            crop insurance, farming loans, and other useful
+            resources for farmers — all in one place.
+        </p>
+    </section>
+
+    <!-- Government Schemes Section -->
+    <main class="yojana-container">
+
+        <h2 class="yojana-heading">
+            Major Government Schemes for Farmers
+        </h2>
+
+        <div class="yojana-grid">
+
+            <!-- PM Kisan Samman Nidhi -->
+            <div class="yojana-card">
+
+                <div class="yojana-icon">💰</div>
+
+                <h3>PM-KISAN Samman Nidhi</h3>
+
+                <p>
+                    A government scheme that provides financial
+                    assistance to eligible farmer families.
+                    Visit the official portal to check installment
+                    information, e-KYC requirements, and beneficiary
+                    status.
+                </p>
+
+                <a class="yojana-btn"
+                   href="https://pmkisan.gov.in/"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Visit Official Website ↗
+                </a>
+
+            </div>
+
+            <!-- PM Fasal Bima Yojana -->
+            <div class="yojana-card">
+
+                <div class="yojana-icon">🌾</div>
+
+                <h3>Pradhan Mantri Fasal Bima Yojana</h3>
+
+                <p>
+                    A crop insurance scheme designed to provide
+                    protection against eligible crop losses.
+                    Explore insurance information, application
+                    procedures, and claim-related details.
+                </p>
+
+                <a class="yojana-btn"
+                   href="https://pmfby.gov.in/"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Visit Official Website ↗
+                </a>
+
+            </div>
+
+            <!-- Kisan Credit Card -->
+            <div class="yojana-card">
+
+                <div class="yojana-icon">🏦</div>
+
+                <h3>Kisan Credit Card (KCC)</h3>
+
+                <p>
+                    Explore information about agricultural credit
+                    and the Kisan Credit Card scheme, which helps
+                    eligible farmers access credit for farming
+                    and related agricultural needs.
+                </p>
+
+                <a class="yojana-btn"
+                   href="https://www.myscheme.gov.in/"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Explore Scheme Details ↗
+                </a>
+
+            </div>
+
+            <!-- PM Krishi Sinchai Yojana -->
+            <div class="yojana-card">
+
+                <div class="yojana-icon">💧</div>
+
+                <h3>Pradhan Mantri Krishi Sinchai Yojana</h3>
+
+                <p>
+                    Learn about irrigation, water conservation,
+                    and efficient water management initiatives
+                    that support agricultural development.
+                    Check the applicable guidelines for your state.
+                </p>
+
+                <a class="yojana-btn"
+                   href="https://pmksy.gov.in/"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Visit Official Website ↗
+                </a>
+
+            </div>
+
+            <!-- Soil Health Card -->
+            <div class="yojana-card">
+
+                <div class="yojana-icon">🌱</div>
+
+                <h3>Soil Health Card Scheme</h3>
+
+                <p>
+                    Learn about soil testing, soil nutrient levels,
+                    and recommendations that can help farmers
+                    understand their soil's condition and
+                    make informed fertilizer decisions.
+                </p>
+
+                <a class="yojana-btn"
+                   href="https://soilhealth.dac.gov.in/"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Visit Official Website ↗
+                </a>
+
+            </div>
+
+            <!-- Other Government Schemes -->
+            <div class="yojana-card">
+
+                <div class="yojana-icon">📢</div>
+
+                <h3>Other Government Schemes</h3>
+
+                <p>
+                    Discover other government schemes that may
+                    benefit farmers and agricultural workers.
+                    Check eligibility criteria, required documents,
+                    application procedures, and deadlines.
+                </p>
+
+                <a class="yojana-btn"
+                   href="https://www.myscheme.gov.in/"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Explore All Schemes ↗
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- Important Information -->
+        <div class="yojana-note">
+
+            <strong>📌 Important Information for Farmers</strong>
+
+            <p>
+                Scheme eligibility, application deadlines,
+                payment schedules, and government announcements
+                may change over time. Before applying, always
+                verify the latest information on the relevant
+                official government website.
+            </p>
+
+            <a href="https://www.myscheme.gov.in/"
+               target="_blank"
+               rel="noopener noreferrer">
+                Find Government Schemes ↗
+            </a>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

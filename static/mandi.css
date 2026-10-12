@@ -1,0 +1,671 @@
+/* ========================================
+   KRISHIORBIT - MANDI BHAV PAGE
+   Modern Responsive Design
+======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --mandi-green: #087443;
+    --mandi-dark: #064e32;
+    --mandi-light: #e9f8ef;
+    --mandi-accent: #f4a62a;
+    --mandi-text: #173b2c;
+    --mandi-muted: #64776c;
+    --mandi-border: #dce9df;
+    --mandi-white: #ffffff;
+    --mandi-bg: #f4f8f4;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', Arial, sans-serif;
+    color: var(--mandi-text);
+    background: var(--mandi-bg);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Keep page elements within the screen */
+
+img {
+    max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+/* ========================================
+   NAVBAR
+======================================== */
+
+nav,
+.navbar {
+    position: relative;
+    z-index: 10;
+}
+
+.navbar a,
+nav a {
+    transition: color 0.2s ease;
+}
+
+/* ========================================
+   HERO SECTION
+======================================== */
+
+.mandi-hero,
+.hero-mandi,
+.page-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 55px 7%;
+    color: white;
+    background:
+        radial-gradient(
+            circle at 95% 10%,
+            rgba(83, 190, 126, 0.38),
+            transparent 35%
+        ),
+        linear-gradient(
+            120deg,
+            #064e32,
+            #087b48 65%,
+            #11915a
+        );
+}
+
+.mandi-hero h1,
+.hero-mandi h1,
+.page-hero h1 {
+    margin: 12px 0;
+    font-size: clamp(30px, 4vw, 48px);
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.mandi-hero p,
+.hero-mandi p,
+.page-hero p {
+    max-width: 680px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+}
+
+/* ========================================
+   MAIN CONTENT
+======================================== */
+
+.mandi-container,
+.mandi-page,
+.mandi-main,
+.container {
+    width: min(1200px, 92%);
+    margin: 35px auto;
+}
+
+.mandi-section,
+.mandi-card,
+.search-card,
+.price-section {
+    margin-bottom: 25px;
+    padding: 28px;
+    background: var(--mandi-white);
+    border: 1px solid var(--mandi-border);
+    border-radius: 18px;
+    box-shadow: 0 5px 20px rgba(22, 75, 43, 0.06);
+}
+
+.mandi-section h2,
+.search-card h2,
+.price-section h2 {
+    margin: 0 0 8px;
+    color: var(--mandi-dark);
+    font-size: clamp(22px, 2.5vw, 29px);
+    font-weight: 800;
+}
+
+.mandi-section p,
+.search-card p {
+    color: var(--mandi-muted);
+}
+
+/* ========================================
+   SEARCH FORM
+======================================== */
+
+.mandi-search,
+.search-form,
+.filter-form,
+form {
+    max-width: 100%;
+}
+
+.mandi-search,
+.search-form,
+.filter-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.mandi-search label,
+.search-form label,
+.filter-form label,
+form label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--mandi-text);
+    font-weight: 600;
+}
+
+.mandi-search input,
+.mandi-search select,
+.search-form input,
+.search-form select,
+.filter-form input,
+.filter-form select {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    color: var(--mandi-text);
+    background: #fbfdfb;
+    border: 1px solid #cfdfd3;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.mandi-search input:focus,
+.mandi-search select:focus,
+.search-form input:focus,
+.search-form select:focus,
+.filter-form input:focus,
+.filter-form select:focus {
+    border-color: var(--mandi-green);
+    box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.12);
+}
+
+.mandi-search input::placeholder,
+.search-form input::placeholder,
+.filter-form input::placeholder {
+    color: #93a399;
+}
+
+.mandi-search button,
+.search-form button,
+.filter-form button,
+button[type="submit"] {
+    min-height: 46px;
+    padding: 12px 22px;
+    color: white;
+    font-weight: 700;
+    background: linear-gradient(135deg, #087443, #11945a);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mandi-search button:hover,
+.search-form button:hover,
+.filter-form button:hover,
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(8, 116, 67, 0.2);
+}
+
+.mandi-search .form-actions,
+.search-form .form-actions,
+.filter-form .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+button[type="reset"],
+.clear-button,
+.clear-search {
+    padding: 11px 18px;
+    color: var(--mandi-green);
+    background: var(--mandi-light);
+    border: 1px solid #cce8d5;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* ========================================
+   NOTICE / API ERROR
+======================================== */
+
+.alert,
+.notice,
+.error-message,
+.api-error {
+    margin: 18px 0;
+    padding: 15px 18px;
+    color: #81521a;
+    background: #fff8e8;
+    border: 1px solid #f5dfaa;
+    border-left: 5px solid var(--mandi-accent);
+    border-radius: 10px;
+}
+
+.success-message {
+    padding: 14px 18px;
+    color: #17633e;
+    background: #eaf8ef;
+    border: 1px solid #ccebd7;
+    border-radius: 10px;
+}
+
+/* ========================================
+   PRICE CARDS
+======================================== */
+
+.mandi-results,
+.price-grid,
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.price-card,
+.mandi-price-card,
+.result-card {
+    position: relative;
+    padding: 22px;
+    overflow: hidden;
+    background: white;
+    border: 1px solid var(--mandi-border);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(22, 75, 43, 0.05);
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.price-card:hover,
+.mandi-price-card:hover,
+.result-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 26px rgba(22, 75, 43, 0.11);
+}
+
+.price-card h3,
+.mandi-price-card h3,
+.result-card h3 {
+    margin: 0 0 8px;
+    color: var(--mandi-dark);
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.price-card .price,
+.mandi-price-card .price,
+.result-card .price {
+    margin: 15px 0;
+    color: var(--mandi-green);
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.price-card .location,
+.mandi-price-card .location,
+.result-card .location {
+    color: var(--mandi-muted);
+    font-size: 14px;
+}
+
+.price-card .badge,
+.mandi-price-card .badge,
+.result-card .badge {
+    display: inline-block;
+    padding: 5px 10px;
+    color: #17633e;
+    background: var(--mandi-light);
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* ========================================
+   NO RESULTS
+======================================== */
+
+.no-results,
+.empty-state,
+.no-data {
+    padding: 45px 24px;
+    text-align: center;
+    background: white;
+    border: 1px dashed #c7dfcd;
+    border-radius: 16px;
+}
+
+.no-results h3,
+.empty-state h3,
+.no-data h3 {
+    margin: 12px 0;
+    color: var(--mandi-dark);
+    font-size: 22px;
+}
+
+.no-results p,
+.empty-state p,
+.no-data p {
+    color: var(--mandi-muted);
+}
+
+.no-results a,
+.empty-state a,
+.no-data a {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 10px 18px;
+    color: white;
+    background: var(--mandi-green);
+    border-radius: 9px;
+    text-decoration: none;
+}
+
+/* ========================================
+   TABLES
+======================================== */
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 12px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th,
+td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e4eee6;
+}
+
+th {
+    color: white;
+    background: var(--mandi-green);
+    font-weight: 700;
+}
+
+tr:hover td {
+    background: #f4fbf6;
+}
+
+/* ========================================
+   LINKS
+======================================== */
+
+a {
+    color: var(--mandi-green);
+}
+
+a:hover {
+    color: #034c2e;
+}
+
+/* ========================================
+   FOOTER
+======================================== */
+
+footer {
+    margin-top: 45px;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+======================================== */
+
+@media (max-width: 900px) {
+    .mandi-results,
+    .price-grid,
+    .results-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mandi-container,
+    .mandi-page,
+    .mandi-main,
+    .container {
+        width: 94%;
+    }
+
+    .mandi-section,
+    .mandi-card,
+    .search-card,
+    .price-section {
+        padding: 22px;
+    }
+}
+
+@media (max-width: 600px) {
+    .mandi-hero,
+    .hero-mandi,
+    .page-hero {
+        padding: 35px 5%;
+    }
+
+    .mandi-container,
+    .mandi-page,
+    .mandi-main,
+    .container {
+        width: 94%;
+        margin: 20px auto;
+    }
+
+    .mandi-search,
+    .search-form,
+    .filter-form,
+    .mandi-results,
+    .price-grid,
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mandi-section,
+    .mandi-card,
+    .search-card,
+    .price-section {
+        padding: 18px;
+        border-radius: 13px;
+    }
+
+    .mandi-search .form-actions,
+    .search-form .form-actions,
+    .filter-form .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .mandi-search button,
+    .search-form button,
+    .filter-form button {
+        width: 100%;
+    }
+
+    th,
+    td {
+        padding: 10px;
+        white-space: nowrap;
+    }
+}
+/* ===== KrishiOrbit Mandi Page Layout Fix ===== */
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f8f4;
+    color: #183b2b;
+}
+
+/* Main page width */
+body:has(input[name="commodity"]) main,
+body:has(input[name="commodity"]) .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 24px;
+}
+
+/* Hero heading */
+body:has(input[name="commodity"]) h1 {
+    font-size: 42px;
+    font-weight: 800;
+}
+
+/* Form inputs */
+body:has(input[name="commodity"]) input,
+body:has(input[name="commodity"]) select {
+    width: 100%;
+    max-width: 100%;
+    min-height: 46px;
+    padding: 12px 14px;
+    margin: 5px 0 12px;
+    border: 1px solid #cbdccf;
+    border-radius: 9px;
+    background: white;
+    box-sizing: border-box;
+}
+
+/* Search buttons */
+body:has(input[name="commodity"]) button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 9px;
+    background: #087443;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+body:has(input[name="commodity"]) button:hover {
+    background: #065a35;
+}
+
+/* Cards and notices */
+body:has(input[name="commodity"]) .card,
+body:has(input[name="commodity"]) .notice,
+body:has(input[name="commodity"]) .alert {
+    padding: 22px;
+    margin: 18px 0;
+    border-radius: 14px;
+    background: white;
+    border: 1px solid #dce9df;
+    box-shadow: 0 4px 15px rgba(0, 70, 35, 0.06);
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+    body:has(input[name="commodity"]) main,
+    body:has(input[name="commodity"]) .container {
+        padding: 0 14px;
+    }
+
+    body:has(input[name="commodity"]) h1 {
+        font-size: 30px;
+    }
+}
+
+/* ========================================
+   KRISHIORBIT NAVBAR
+======================================== */
+
+.navbar {
+    width: 100%;
+    min-height: 72px;
+    padding: 14px 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 25px;
+    background: #ffffff;
+    border-bottom: 1px solid #e0eae3;
+    box-shadow: 0 3px 12px rgba(0, 70, 35, 0.06);
+    position: relative;
+    z-index: 100;
+}
+
+.navbar .logo {
+    color: #087443;
+    font-size: 23px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.nav-links a {
+    padding: 10px 15px;
+    color: #334b3c;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 9px;
+    transition: all 0.25s ease;
+}
+
+.nav-links a:hover {
+    color: #087443;
+    background: #eaf7ee;
+}
+
+.nav-links a.active {
+    color: #087443;
+    background: #e4f5e9;
+    font-weight: 700;
+}
+
+/* Mobile Navbar */
+
+@media (max-width: 700px) {
+    .navbar {
+        padding: 15px 4%;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .navbar .logo {
+        font-size: 21px;
+    }
+
+    .nav-links {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 5px;
+    }
+
+    .nav-links a {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+}

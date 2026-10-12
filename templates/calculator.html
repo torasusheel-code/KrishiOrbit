@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Farming Calculator | KrishiOrbit</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='calculator.css') }}">
+</head>
+
+<body>
+
+<nav class="navbar">
+    <a class="logo" href="/">🌾 KrishiOrbit</a>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/crops">Crop Guide</a>
+        <a href="/weather">Weather</a>
+        <a href="/mandi">Mandi Prices</a>
+        <a href="/calculator" class="active">Calculator</a>
+    </div>
+</nav>
+
+<header class="calculator-hero">
+    <div class="hero-content">
+        <span class="eyebrow">🌱 SMART FARMING TOOLS</span>
+
+        <h1>Farming Calculator</h1>
+
+        <p>
+            Estimate your seed requirement and calculate
+            the expected seed cost for your farm.
+        </p>
+
+        <div class="hero-tags">
+            <span>✓ Quick Estimate</span>
+            <span>✓ Simple Calculation</span>
+            <span>✓ Farmer Friendly</span>
+        </div>
+    </div>
+
+    <div class="hero-art">
+        <div class="sun"></div>
+        <div class="hill hill-back"></div>
+        <div class="hill hill-front"></div>
+        <div class="crop crop-one">🌾</div>
+        <div class="crop crop-two">🌱</div>
+        <div class="crop crop-three">🌾</div>
+    </div>
+</header>
+
+<main class="calculator-container">
+
+    <section class="calculator-intro">
+        <div>
+            <span class="section-kicker">PLAN WITH CONFIDENCE</span>
+            <h2>Calculate Your Seed Budget</h2>
+            <p>
+                Enter your farm area, seed rate, and seed price
+                to get an estimate.
+            </p>
+        </div>
+
+        <div class="intro-icon">🧮</div>
+    </section>
+
+    <div class="calculator-layout">
+
+        <section class="form-card">
+
+            <div class="card-heading">
+                <div class="card-icon">✍️</div>
+
+                <div>
+                    <h3>Farm Details</h3>
+                    <p>Fill in the values below</p>
+                </div>
+            </div>
+
+            <form method="POST" class="calculator-form">
+
+                <div class="form-field">
+                    <label for="area">
+                        Farm Area <span>(hectares)</span>
+                    </label>
+
+                    <div class="input-wrap">
+                        <span class="input-icon">📐</span>
+
+                        <input
+                            type="number"
+                            id="area"
+                            name="area"
+                            min="0.01"
+                            step="any"
+                            placeholder="Example: 2"
+                            value="{{ request.form.get('area', '') }}"
+                            required
+                        >
+                    </div>
+
+                    <small>
+                        Enter the total area you plan to cultivate.
+                    </small>
+                </div>
+
+                <div class="form-field">
+                    <label for="seed_rate">
+                        Seed Rate <span>(kg/hectare)</span>
+                    </label>
+
+                    <div class="input-wrap">
+                        <span class="input-icon">🌱</span>
+
+                        <input
+                            type="number"
+                            id="seed_rate"
+                            name="seed_rate"
+                            min="0"
+                            step="any"
+                            placeholder="Example: 100"
+                            value="{{ request.form.get('seed_rate', '') }}"
+                            required
+                        >
+                    </div>
+
+                    <small>
+                        Use the recommended rate for your crop.
+                    </small>
+                </div>
+
+                <div class="form-field">
+                    <label for="cost_per_kg">
+                        Seed Price <span>(₹ per kg)</span>
+                    </label>
+
+                    <div class="input-wrap">
+                        <span class="input-icon">₹</span>
+
+                        <input
+                            type="number"
+                            id="cost_per_kg"
+                            name="cost_per_kg"
+                            min="0"
+                            step="any"
+                            placeholder="Example: 40"
+                            value="{{ request.form.get('cost_per_kg', '') }}"
+                            required
+                        >
+                    </div>
+
+                    <small>
+                        Enter the price of one kilogram of seed.
+                    </small>
+                </div>
+
+                <button class="calculate-btn" type="submit">
+                    <span>Calculate Estimate</span>
+                    <span>→</span>
+                </button>
+
+            </form>
+        </section>
+
+        <aside class="side-card">
+
+            <div class="side-icon">🌿</div>
+
+            <h3>How It Works</h3>
+
+            <p>
+                Enter three values to estimate the seed quantity
+                and its approximate cost.
+            </p>
+
+            <div class="formula-box">
+                <span>Seed Quantity</span>
+                <strong>Farm Area × Seed Rate</strong>
+            </div>
+
+            <div class="formula-box">
+                <span>Estimated Seed Cost</span>
+                <strong>Seed Quantity × Price per kg</strong>
+            </div>
+
+            <div class="side-note">
+                <span>💡</span>
+
+                <p>
+                    Seed rates vary by crop, variety, spacing,
+                    and local farming conditions. Check the
+                    recommended rate for your crop.
+                </p>
+            </div>
+
+        </aside>
+
+    </div>
+
+    {% if error %}
+    <div class="message error-message">
+        <span>⚠️</span>
+        <p>{{ error }}</p>
+    </div>
+    {% endif %}
+
+    {% if result %}
+
+    <section class="result-section">
+
+        <div class="result-heading">
+            <div>
+                <span class="section-kicker">YOUR ESTIMATE</span>
+                <h2>Calculation Results</h2>
+            </div>
+
+            <span class="result-badge">
+                ✓ Calculation Complete
+            </span>
+        </div>
+
+        <div class="result-grid">
+
+            <div class="result-card seed-result">
+                <div class="result-card-top">
+                    <span class="result-icon">🌾</span>
+                    <span class="result-label">
+                        Estimated Seed Quantity
+                    </span>
+                </div>
+
+                <div class="result-value">
+                    {{ result.seed_quantity }} <span>kg</span>
+                </div>
+
+                <p>
+                    Estimated seed required for your farm.
+                </p>
+            </div>
+
+            <div class="result-card cost-result">
+                <div class="result-card-top">
+                    <span class="result-icon">💰</span>
+                    <span class="result-label">
+                        Estimated Seed Cost
+                    </span>
+                </div>
+
+                <div class="result-value">
+                    ₹{{ result.total_cost }}
+                </div>
+
+                <p>
+                    Estimated cost based on your entered price.
+                </p>
+            </div>
+
+        </div>
+
+        <p class="result-disclaimer">
+            This is an estimate based on your inputs.
+            Actual seed requirements and costs may vary
+            by crop and local conditions.
+        </p>
+
+    </section>
+
+    {% endif %}
+
+</main>
+
+<footer class="footer">
+    <div class="footer-brand">🌾 KrishiOrbit</div>
+
+    <p>Smart farming starts with informed decisions.</p>
+
+    <small>© 2026 KrishiOrbit. All rights reserved.</small>
+</footer>
+
+</body>
+</html>

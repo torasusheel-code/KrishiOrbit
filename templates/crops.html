@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Crop Guide | KrishiOrbit</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<header class="crop-navbar">
+
+    <a href="/" class="crop-logo">
+        🌱 <span>KrishiOrbit</span>
+    </a>
+
+    <nav class="crop-nav-links">
+        <a href="/">Home</a>
+        <a href="/crops" class="active">🌱 Crop Guide</a>
+        <a href="/weather">☁ Weather</a>
+        <a href="/mandi">▦ Mandi Bhav</a>
+        <a href="/calculator">▣ Calculator</a>
+    </nav>
+
+    <div class="language-box">
+        <label for="languageSelect">🌐 Language:</label>
+
+        <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी</option>
+            <option value="pa">ਪੰਜਾਬੀ</option>
+            <option value="ur">اردو</option>
+        </select>
+    </div>
+
+</header>
+
+
+<!-- ================= HERO SECTION ================= -->
+
+<section class="crop-hero">
+
+    <div class="crop-hero-content">
+
+        <span class="hero-label">🌾 SMART FARMING GUIDE</span>
+
+        <h1 data-i18n="cropGuideTitle">
+            🌱 Crop Guide
+        </h1>
+
+        <p data-i18n="cropHeroDescription">
+            Find useful information about major crops, their seasons,
+            growing duration and essential care.
+        </p>
+
+        <div class="hero-highlights">
+
+            <span>✓ Reliable Information</span>
+            <span>🌱 Better Crops</span>
+            <span>☀ A Brighter Future</span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= MAIN SECTION ================= -->
+
+<main class="crop-container">
+
+    <!-- SEARCH AND FILTER -->
+
+    <section class="crop-toolbar">
+
+        <input
+            type="search"
+            id="cropSearch"
+            placeholder="🔍 Search for a crop..."
+            data-i18n-placeholder="searchCrop"
+            aria-label="Search crops"
+        >
+
+        <select id="seasonFilter" aria-label="Filter by season">
+
+            <option value="" data-i18n="allSeasons">
+                All Seasons
+            </option>
+
+            <option value="rabi" data-i18n="rabi">
+                Rabi
+            </option>
+
+            <option value="kharif" data-i18n="kharif">
+                Kharif
+            </option>
+
+            <option value="zaid" data-i18n="zaid">
+                Zaid
+            </option>
+
+        </select>
+
+        <button type="button"
+                id="clearCropFilters"
+                class="clear-btn"
+                data-i18n="clear">
+            Clear
+        </button>
+
+    </section>
+
+
+    <!-- RESULT COUNT -->
+
+    <p id="cropCount" class="crop-count" aria-live="polite"></p>
+
+
+    <!-- NO RESULTS -->
+
+    <p id="noCropsFound" class="no-crops" hidden>
+        🌱 No crops found. Try another name.
+    </p>
+
+
+    <!-- ================= CROP CARDS ================= -->
+
+    <section class="crop-grid" id="cropGrid">
+
+        {% for crop in crops %}
+
+        <article
+            class="crop-card"
+            data-crop-name="{{ crop.name | lower }}"
+            data-crop-season="{{ crop.season | lower }}">
+
+        <!-- Crop image -->
+<div class="crop-image">
+
+    {% set crop_name = crop.name | lower %}
+
+    {% if 'maize' in crop_name %}
+        <img src="{{ url_for('static', filename='images/maize.png') }}"
+             alt="Maize crop" loading="lazy">
+
+    {% elif 'mustard' in crop_name %}
+        <img src="{{ url_for('static', filename='images/mustard.png') }}"
+             alt="Mustard crop" loading="lazy">
+
+    {% elif 'potato' in crop_name %}
+        <img src="{{ url_for('static', filename='images/potato.png') }}"
+             alt="Potato crop" loading="lazy">
+
+    {% elif 'rice' in crop_name %}
+        <img src="{{ url_for('static', filename='images/rice.png') }}"
+             alt="Rice crop" loading="lazy">
+
+    {% elif 'wheat' in crop_name %}
+        <img src="{{ url_for('static', filename='images/wheat.png') }}"
+             alt="Wheat crop" loading="lazy">
+
+    {% elif 'gram' in crop_name %}
+        <img src="{{ url_for('static', filename='images/gram.png') }}"
+             alt="Gram crop" loading="lazy">
+
+    {% elif 'onion' in crop_name %}
+        <img src="{{ url_for('static', filename='images/onion.png') }}"
+             alt="Onion crop" loading="lazy">
+
+    {% elif 'peas' in crop_name %}
+        <img src="{{ url_for('static', filename='images/peas.png') }}"
+             alt="Peas crop" loading="lazy">
+
+    {% elif 'soybean' in crop_name %}
+        <img src="{{ url_for('static', filename='images/soybean.png') }}"
+             alt="Soybean crop" loading="lazy">
+
+    {% elif 'bajra' in crop_name %}
+        <img src="{{ url_for('static', filename='images/bajra.png') }}"
+             alt="Bajra crop" loading="lazy">
+
+    {% elif 'tomato' in crop_name %}
+        <img src="{{ url_for('static', filename='images/tomato.png') }}"
+             alt="Tomato crop" loading="lazy">
+
+    {% else %}
+        <div class="crop-image-placeholder">
+            🌱
+        </div>
+    {% endif %}
+
+</div>
+            <!-- Crop details -->
+
+            <div class="crop-card-body">
+
+                <h2>{{ crop.name }}</h2>
+
+                <div class="crop-info-row">
+                    <span>🌦️ Season</span>
+                    <strong>{{ crop.season }}</strong>
+                </div>
+
+                <div class="crop-info-row">
+                    <span>⏳ Duration</span>
+                    <strong>{{ crop.duration }}</strong>
+                </div>
+
+                <p class="crop-description">
+                    {{ crop.description or 'Crop information is coming soon.' }}
+                </p>
+
+                <!-- Read More -->
+
+                <button
+                    type="button"
+                    class="read-more-btn"
+                    data-crop-index="{{ loop.index0 }}">
+
+                    Read More →
+                </button>
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+    </section>
+
+</main>
+
+
+<!-- ================= CROP DETAILS MODAL ================= -->
+
+<div id="cropModal" class="crop-modal" hidden>
+
+    <div class="crop-modal-content"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modalCropName">
+
+        <button
+            type="button"
+            class="modal-close"
+            id="modalClose"
+            aria-label="Close">
+            &times;
+        </button>
+
+        <div class="modal-icon">🌱</div>
+
+        <h2 id="modalCropName"></h2>
+
+        <div class="modal-detail-row">
+            <span>🌦️ Season:</span>
+            <strong id="modalSeason"></strong>
+        </div>
+
+        <div class="modal-detail-row">
+            <span>⏳ Growing Duration:</span>
+            <strong id="modalDuration"></strong>
+        </div>
+
+        <h3>Crop Description</h3>
+
+        <p id="modalDescription"></p>
+
+        <!-- SMART SOWING ADVISOR -->
+
+<div class="sowing-advisor">
+
+    <h3>🌱 Smart Sowing Advisor</h3>
+
+    <p>Apni location select karein:</p>
+
+    <label for="farmerState">State / Region</label>
+
+    <select id="farmerState">
+        <option value="">Select State</option>
+        <option value="jammu">Jammu</option>
+        <option value="punjab">Punjab</option>
+        <option value="himachal">Himachal Pradesh</option>
+    </select>
+
+    <label for="farmerDistrict">District</label>
+
+    <input
+        type="text"
+        id="farmerDistrict"
+        placeholder="Enter your district"
+    >
+
+    <button
+        type="button"
+        id="checkSowingBtn"
+        class="read-more-btn">
+        Check Sowing Time
+    </button>
+
+    <div id="sowingResult" hidden>
+
+        <h4>📅 Sowing Recommendation</h4>
+
+        <p>
+            <strong>Crop:</strong>
+            <span id="adviceCrop"></span>
+        </p>
+
+        <p>
+            <strong>Recommended Period:</strong>
+            <span id="advicePeriod"></span>
+        </p>
+
+        <p>
+            <strong>Today's Status:</strong>
+            <span id="adviceStatus"></span>
+        </p>
+
+        <p>
+            <strong>Farming Advice:</strong>
+            <span id="adviceMessage"></span>
+        </p>
+
+    </div>
+<!-- 7-Day Weather Forecast -->
+<div id="weatherForecast" class="weather-forecast" hidden>
+
+    <h4>🌦️ Next 7 Days Weather Forecast</h4>
+
+    <div id="dailyForecastGrid" class="daily-forecast-grid"></div>
+
+    <p id="weatherAdvice" class="weather-advice"></p>
+
+</div>
+
+<!-- Smart Farming Advice -->
+<div id="smartFarmingAdvice" class="smart-farming-advice" hidden>
+    <h4>🌱 Smart Farming Advice</h4>
+
+    <div class="farming-advice-card">
+        <h5>💧 Irrigation Advice</h5>
+        <p id="irrigationAdvice"></p>
+    </div>
+
+    <div class="farming-advice-card">
+        <h5>🌦️ Weather Precaution</h5>
+        <p id="weatherPrecaution"></p>
+    </div>
+
+    <div class="farming-advice-card">
+        <h5>🌾 Field Work</h5>
+        <p id="fieldWorkAdvice"></p>
+    </div>
+
+    <p class="farming-note">
+        Note: These are general weather-based suggestions.
+        Check soil moisture and local agricultural guidance
+        before making farming decisions.
+    </p>
+</div>
+</div>
+
+        <button
+            type="button"
+            class="modal-done-btn"
+            id="modalDone">
+            Close
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer class="crop-footer">
+
+    <p>
+        🌱 © 2026 KrishiOrbit |
+        Growing a Better Agricultural Future
+    </p>
+
+</footer>
+
+
+<!-- ================= JAVASCRIPT ================= -->
+
+<script>
+/*
+ * Flask se aane wali crop details ko JavaScript mein safely
+ * available karne ke liye Jinja tojson ka use kiya gaya hai.
+ */
+
+const cropData = [
+    {% for crop in crops %}
+  {
+        name: {{ crop.name | tojson }},
+        season: {{ crop.season | tojson }},
+        duration: {{ crop.duration | tojson }},
+        description: {{ (crop.description or 'Crop information is coming soon.') | tojson }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+
+// Elements
+const cropSearch = document.getElementById("cropSearch");
+const seasonFilter = document.getElementById("seasonFilter");
+const clearCropFilters = document.getElementById("clearCropFilters");
+
+const cropCards = document.querySelectorAll(".crop-card");
+const cropCount = document.getElementById("cropCount");
+const noCropsFound = document.getElementById("noCropsFound");
+
+const cropModal = document.getElementById("cropModal");
+const modalClose = document.getElementById("modalClose");
+const modalDone = document.getElementById("modalDone");
+// ================= READ MORE =================
+
+// Show crop information
+function showCropInfo(index) {
+    const crop = cropData[index];
+
+    if (!crop) {
+        console.error("Crop information not found:", index);
+        return;
+    }
+
+    document.getElementById("modalCropName").textContent =
+        crop.name || "";
+
+    document.getElementById("modalSeason").textContent =
+        crop.season || "Not available";
+
+    document.getElementById("modalDuration").textContent =
+        crop.duration || "Not available";
+
+    document.getElementById("modalDescription").textContent =
+        crop.description || "No description available.";
+
+    // Open modal
+    cropModal.hidden = false;
+    cropModal.style.display = "flex";
+}
+
+// Read More button click events
+document.querySelectorAll(".read-more-btn").forEach(function(button) {
+    button.addEventListener("click", function() {
+        const index = Number(this.dataset.cropIndex);
+        showCropInfo(index);
+    });
+});
+
+// Close modal function
+function closeCropInfo() {
+    cropModal.hidden = true;
+    cropModal.style.display = "none";
+}
+
+// Close button
+if (modalClose) {
+    modalClose.addEventListener("click", closeCropInfo);
+}
+
+// Done button
+if (modalDone) {
+    modalDone.addEventListener("click", closeCropInfo);
+}
+
+// Close modal by clicking outside
+cropModal.addEventListener("click", function(event) {
+    if (event.target === cropModal) {
+        closeCropInfo();
+    }
+});
+
+// Close modal using Escape key
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape" && !cropModal.hidden) {
+        closeCropInfo();
+    }
+});
+
+
+// Close modal using Escape
+document.addEventListener("keydown", function(event) {
+
+    if (event.key === "Escape" && !cropModal.hidden) {
+        closeCropInfo();
+    }
+});
+
+
+// ================= SMART SOWING ADVISOR =================
+
+// These are indicative seasonal windows, not verified
+// district-specific agricultural recommendations.
+
+const sowingCalendar = {
+    Rice: {
+        jammu: {
+            period: "Generally May–June",
+            start: [4, 15],
+            end: [6, 30]
+        },
+        punjab: {
+            period: "Nursery generally May–early June; transplanting June–July",
+            start: [5, 1],
+            end: [7, 15]
+        },
+        himachal: {
+            period: "Generally May–June in suitable lower and mid-hill areas",
+            start: [4, 15],
+            end: [6, 30]
+        }
+    },
+
+    Wheat: {
+        jammu: {
+            period: "Generally October–November",
+            start: [9, 1],
+            end: [10, 30]
+        },
+        punjab: {
+            period: "Generally late October–November",
+            start: [9, 20],
+            end: [10, 30]
+        },
+        himachal: {
+            period: "Generally October–November in suitable areas",
+            start: [9, 1],
+            end: [10, 30]
+        }
+    },
+
+    Mustard: {
+        jammu: {
+            period: "Generally October–November",
+            start: [9, 1],
+            end: [10, 30]
+        },
+        punjab: {
+            period: "Generally October–November",
+            start: [9, 1],
+            end: [10, 30]
+        },
+        himachal: {
+            period: "Generally September–October; varies by altitude",
+            start: [8, 1],
+            end: [9, 31]
+        }
+    },
+
+    Maize: {
+        jammu: {
+            period: "Generally spring or monsoon season, depending on area",
+            start: [2, 1],
+            end: [6, 30]
+        },
+        punjab: {
+            period: "Spring and monsoon crops have different sowing windows",
+            start: [1, 1],
+            end: [6, 30]
+        },
+        himachal: {
+            period: "Generally March–April in many lower and mid-hill areas",
+            start: [2, 1],
+            end: [4, 30]
+        }
+    },
+
+    Potato: {
+        jammu: {
+            period: "Season varies with area and planting system",
+            start: [8, 1],
+            end: [10, 31]
+        },
+        punjab: {
+            period: "Generally October–November for the main autumn crop",
+            start: [9, 1],
+            end: [10, 30]
+        },
+        himachal: {
+            period: "Planting period varies with altitude and season",
+            start: [1, 1],
+            end: [6, 30]
+        }
+    }
+};
+
+// ================= SMART SOWING ADVISOR =================
+
+document.getElementById("checkSowingBtn").addEventListener(
+    "click",
+    async function () {
+
+        const state = document.getElementById("farmerState").value;
+
+        const district = document.getElementById("farmerDistrict")
+            .value.trim();
+
+        const cropName = document.getElementById("modalCropName")
+            .textContent.trim();
+
+        const result = document.getElementById("sowingResult");
+
+        const button = document.getElementById("checkSowingBtn");
+
+        // Validate inputs
+        if (!state) {
+            alert("Please select your state.");
+            return;
+        }
+
+        if (!district) {
+            alert("Please enter your district.");
+            return;
+        }
+
+        if (!cropName) {
+            alert("Please select a crop first.");
+            return;
+        }
+
+        // Show loading status
+        button.disabled = true;
+        button.textContent = "Checking weather...";
+
+        result.hidden = false;
+
+        document.getElementById("adviceCrop").textContent = cropName;
+
+        document.getElementById("advicePeriod").textContent =
+            "Checking local sowing information...";
+
+        document.getElementById("adviceStatus").textContent =
+            "Please wait...";
+
+        document.getElementById("adviceMessage").textContent =
+            "Fetching weather information.";
+
+        try {
+
+           // ================= CALL FLASK API =================
+
+const response = await fetch("/api/sowing-advice", {
+    method: "POST",
+
+    headers: {
+        "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify({
+        crop: cropName,
+        state: state,
+        district: district
+    })
+});
+
+const data = await response.json();
+
+// ================= CHECK API RESPONSE =================
+
+if (!response.ok || !data.success) {
+
+    document.getElementById("advicePeriod").textContent =
+        "Information unavailable.";
+
+    document.getElementById("adviceStatus").textContent =
+        "Unable to retrieve information.";
+
+    document.getElementById("adviceMessage").textContent =
+        data.message || "Unable to fetch weather information.";
+
+    return;
+}
+
+// ================= CROP INFORMATION =================
+
+document.getElementById("adviceCrop").textContent =
+    data.crop || cropName;
+
+// ================= SOWING INFORMATION =================
+
+const sowing = data.sowing || {};
+
+const advicePeriod =
+    document.getElementById("advicePeriod");
+
+const adviceStatus =
+    document.getElementById("adviceStatus");
+
+const adviceMessage =
+    document.getElementById("adviceMessage");
+
+advicePeriod.textContent =
+    sowing.recommended_period ||
+    "Verified sowing dates are not available.";
+
+// Sowing status
+const statusMessages = {
+    period_active:
+        "Sowing period is active.",
+
+    period_not_started:
+        "Sowing period has not started yet.",
+
+    period_ended:
+        "Sowing period has ended.",
+
+    unavailable:
+        "⚠️ Verified sowing information is not available.",
+
+    local_calendar_required:
+        "⚠️ Verified local sowing calendar is required."
+};
+
+adviceStatus.textContent =
+    statusMessages[sowing.status] ||
+    "Sowing status unavailable.";
+
+// Sowing message
+adviceMessage.textContent =
+    sowing.message ||
+    "Please consult your local agriculture department for crop-specific sowing guidance.";
+
+// ================= CURRENT WEATHER INFORMATION =================
+
+const weather = data.weather || {};
+// ================= 7-DAY WEATHER FORECAST =================
+
+const forecastDates = weather.forecast_dates || [];
+const maxTemps = weather.max_temperature_c || [];
+const minTemps = weather.min_temperature_c || [];
+const rainProbabilities = weather.rain_probability_percent || [];
+const rainfallAmounts = weather.rainfall_mm || [];
+
+const forecastBox = document.getElementById("weatherForecast");
+const forecastGrid = document.getElementById("dailyForecastGrid");
+const weatherAdvice = document.getElementById("weatherAdvice");
+const smartAdviceBox =
+    document.getElementById("smartFarmingAdvice");
+
+const irrigationAdvice =
+    document.getElementById("irrigationAdvice");
+
+const weatherPrecaution =
+    document.getElementById("weatherPrecaution");
+
+const fieldWorkAdvice =
+    document.getElementById("fieldWorkAdvice");
+
+forecastGrid.replaceChildren();
+
+if (forecastDates.length > 0) {
+
+    forecastBox.hidden = false;
+
+    forecastDates.forEach(function(date, index) {
+
+        const card = document.createElement("div");
+        card.className = "daily-forecast-card";
+
+        const heading = document.createElement("h5");
+        heading.textContent = new Date(date + "T12:00:00")
+            .toLocaleDateString("en-IN", {
+                weekday: "short",
+                day: "numeric",
+                month: "short"
+            });
+
+        const temperature = document.createElement("p");
+        temperature.textContent =
+            "🌡️ " +
+            (maxTemps[index] ?? "N/A") + "°C / " +
+            (minTemps[index] ?? "N/A") + "°C";
+// Rain probability
+const rainValue = rainProbabilities[index];
+
+const rainChance = document.createElement("p");
+
+rainChance.textContent =
+    "🌧️ Rain chance: " +
+    (rainValue ?? "N/A") + "%";
+
+// Rain alert badge
+if (Number.isFinite(rainValue)) {
+
+    const alertBadge = document.createElement("span");
+    alertBadge.className = "rain-alert-badge";
+
+    if (rainValue >= 70) {
+        alertBadge.textContent = "⚠️ High Rain Chance";
+        alertBadge.classList.add("rain-high");
+
+    } else if (rainValue >= 40) {
+        alertBadge.textContent = "🌦️ Possible Rain";
+        alertBadge.classList.add("rain-medium");
+
+    } else {
+        alertBadge.textContent = "☀️ Lower Rain Chance";
+        alertBadge.classList.add("rain-low");
+    }
+
+    card.appendChild(alertBadge);
+}
+
+        const rainfall = document.createElement("p");
+        rainfall.textContent =
+            "💧 Rainfall: " +
+            (rainfallAmounts[index] ?? "N/A") + " mm";
+
+        card.append(heading, temperature, rainChance, rainfall);
+        forecastGrid.appendChild(card);
+    });
+
+    const validRainProbabilities = rainProbabilities
+        .filter(value => Number.isFinite(value));
+
+    const maxRainProbability = validRainProbabilities.length
+        ? Math.max(...validRainProbabilities)
+        : null;
+
+    if (maxRainProbability !== null && maxRainProbability >= 70) {
+
+        weatherAdvice.textContent =
+            "Rain probability is high on at least one forecast day. " +
+            "Check the daily forecast and local agricultural guidance " +
+            "before planning irrigation or field operations.";
+
+    } else if (
+        maxRainProbability !== null &&
+        maxRainProbability >= 40
+    ) {
+
+        weatherAdvice.textContent =
+            "Rain is possible during the forecast period. " +
+            "Check daily forecasts before planning irrigation.";
+
+    } else if (maxRainProbability !== null) {
+
+        weatherAdvice.textContent =
+            "The forecast indicates a lower rain probability. " +
+            "Check soil moisture and local conditions before irrigation.";
+
+    } else {
+
+        weatherAdvice.textContent =
+            "Rain probability is unavailable. Check the local forecast " +
+            "before planning field operations.";
+    }// ================= SMART FARMING ADVICE =================
+
+const validRain = rainProbabilities.filter(
+    value => Number.isFinite(value)
+);
+
+const highestRain = validRain.length
+    ? Math.max(...validRain)
+    : null;
+
+const totalRain = rainfallAmounts.reduce(
+    (sum, value) => sum + (Number(value) || 0),
+    0
+);
+
+smartAdviceBox.hidden = false;
+
+// Irrigation advice
+if (highestRain === null) {
+
+    irrigationAdvice.textContent =
+        "Rain forecast is unavailable. Check soil moisture " +
+        "and the local forecast before planning irrigation.";
+
+} else if (highestRain >= 70 || totalRain >= 10) {
+
+    irrigationAdvice.textContent =
+        "Rain is possible during the forecast period. " +
+        "Check soil moisture and expected rainfall before " +
+        "irrigating. Avoid unnecessary watering.";
+
+} else {
+
+    irrigationAdvice.textContent =
+        "Check soil moisture near the root zone before irrigation. " +
+        "Consider the crop's growth stage and local water requirements.";
+}
+
+// Weather precautions
+if (highestRain !== null && highestRain >= 70) {
+
+    weatherPrecaution.textContent =
+        "A high chance of rain is forecast on at least one day. " +
+        "Check daily updates and ensure field drainage is adequate.";
+
+} else if (highestRain !== null && highestRain >= 40) {
+
+    weatherPrecaution.textContent =
+        "Rain is possible. Monitor daily forecasts before " +
+        "spraying or carrying out weather-sensitive field work.";
+
+} else {
+
+    weatherPrecaution.textContent =
+        "Continue monitoring local weather. Follow crop-specific " +
+        "guidance for spraying and other field activities.";
+}
+
+// Field work advice
+if (highestRain !== null && highestRain >= 70) {
+
+    fieldWorkAdvice.textContent =
+        "Review the daily rain forecast before scheduling " +
+        "field operations. Avoid working on waterlogged soil.";
+
+} else {
+
+    fieldWorkAdvice.textContent =
+        "Plan field work according to soil moisture, crop stage, " +
+        "and local weather conditions.";
+}
+
+
+
+} else {
+
+    forecastBox.hidden = true;
+    smartAdviceBox.hidden = true;
+}
+
+            const temperature = weather.temperature_c ?? "N/A";
+            const humidity = weather.humidity_percent ?? "N/A";
+            const precipitation = weather.precipitation_mm ?? "N/A";
+
+            const sowingMessage =
+                sowing.message ||
+                "Verified local sowing information is not available.";
+
+            document.getElementById("adviceMessage").textContent =
+                sowingMessage +
+                " Current temperature: " + temperature +
+                " °C. Humidity: " + humidity +
+                "%. Current precipitation: " + precipitation +
+                " mm.";
+
+        } catch (error) {
+
+            console.error("Sowing Advisor Error:", error);
+
+            document.getElementById("adviceStatus").textContent =
+                "Information unavailable.";
+
+            document.getElementById("adviceMessage").textContent =
+                "Could not fetch information. Please try again.";
+
+        } finally {
+
+            button.disabled = false;
+            button.textContent = "Check Sowing Time";
+
+        }
+    }
+);
+// ================= INITIAL DISPLAY =================
+
+filterCrops();
+
+
+</script>
+
+
+<!-- LANGUAGE SCRIPT -->
+
+<script src="{{ url_for('static', filename='language.js') }}"></script>
+
+</body>
+</html>
