@@ -1123,7 +1123,7 @@ def mandi():
         data = None
 
         command = [
-            "curl.exe",
+            "curl",
             "-sS",
             "-L",
             "--max-time", "30",
