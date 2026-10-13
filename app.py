@@ -770,52 +770,56 @@ def weather():
                 "icon": "🌿"
             }
 
-        # ----------------------------------
+                # ----------------------------------
         # STEP 8: Farming Advice
         # ----------------------------------
         if temperature is not None and temperature >= 35:
-         farming_advice.append(
-        "🌡️ Temperatures are high. Monitor crops for heat "
-        "stress and check soil moisture."
-    )
+            farming_advice.append(
+                "🌡️ Temperatures are high. Monitor crops for heat "
+                "stress and check soil moisture."
+            )
 
         if temperature is not None and temperature <= 10:
-         farming_advice.append(
-        "❄️ Temperatures are low. Follow local agricultural "
-        "guidance to protect sensitive crops from cold."
-    )
+            farming_advice.append(
+                "❄️ Temperatures are low. Follow local agricultural "
+                "guidance to protect sensitive crops from cold."
+            )
 
         if humidity is not None and humidity >= 80:
-         farming_advice.append(
-        "🌿 Humidity is high. Monitor crops for signs of "
-        "disease and maintain proper field ventilation."
-    )
+            farming_advice.append(
+                "🌿 Humidity is high. Monitor crops for signs of "
+                "disease and maintain proper field ventilation."
+            )
 
         if max_rain_chance is not None and max_rain_chance >= 70:
-         farming_advice.append(
-        "🌧️ Rain is likely. Check the local forecast when "
-        "planning harvesting, fertilizer application, "
-        "or spraying."
-    )
+            farming_advice.append(
+                "🌧️ Rain is likely. Check the local forecast when "
+                "planning harvesting, fertilizer application, "
+                "or spraying."
+            )
 
         if not farming_advice:
-         farming_advice.append(
-        "🌱 Monitor your crops regularly and irrigate "
-        "according to soil moisture and crop requirements."
-    )
+            farming_advice.append(
+                "🌱 Monitor your crops regularly and irrigate "
+                "according to soil moisture and crop requirements."
+            )
+
     except ValueError as e:
         error = str(e)
 
     except requests.RequestException:
-     error = (
-        "Unable to retrieve weather data. Please check "
-        "your internet connection and try again."
-    )
+        app.logger.exception("Weather API request failed")
+        error = (
+            "Unable to retrieve weather data. Please check "
+            "your internet connection and try again."
+        )
 
     except (KeyError, TypeError, IndexError):
-     error = (
-        "Unable to process weather data. Please try again later."
-    )
+        app.logger.exception("Unable to process weather data")
+        error = (
+            "Unable to process weather data. Please try again later."
+        )
+
     return render_template(
         "weather.html",
         weather=weather_data,
@@ -827,6 +831,8 @@ def weather():
         rain_alert=rain_alert,
         irrigation_advice=irrigation_advice
     )
+        
+        
 # ---------------- SMART SOWING ADVISOR API ----------------
 
 
@@ -1106,108 +1112,182 @@ MANDI_API_URL = (
 )
 
 
+# ---------------- MANDI API HELPER ----------------
+
+def fetch_mandi_data(params):
+    """Fetch mandi data using curl on Windows and requests elsewhere."""
+
+    # Windows par curl.exe use karein
+    if os.name == "nt":
+        command = [
+            "curl.exe",
+            "-sS",
+            "-G",
+            MANDI_API_URL,
+        ]
+
+        # API key aur filters sahit sabhi parameters bhejein
+        for key, value in params.items():
+            command.extend([
+                "--data-urlencode",
+                f"{key}={value}",
+            ])
+
+        command.extend([
+            "--connect-timeout", "10",
+            "--max-time", "20",
+        ])
+
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=25,
+            check=True,
+        )
+
+        result_data = json.loads(result.stdout)
+
+        if result_data.get("error"):
+            raise RuntimeError(str(result_data["error"]))
+
+        if result_data.get("status") != "ok":
+            raise RuntimeError("Mandi API se valid response nahi mila.")
+
+        return result_data
+
+    # Render aur other platforms par requests use karein
+    response = requests.get(
+        MANDI_API_URL,
+        params=params,
+        timeout=(10, 30),
+    )
+
+    try:
+        response.raise_for_status()
+        result_data = response.json()
+
+        if result_data.get("error"):
+            raise RuntimeError(str(result_data["error"]))
+
+        if result_data.get("status") != "ok":
+            raise RuntimeError("Mandi API se valid response nahi mila.")
+
+        return result_data
+
+    finally:
+        response.close()
+
+
+# ---------------- MANDI ROUTE ----------------
+
 @app.route("/mandi")
 def mandi():
     prices = []
     error = None
+    data = None
 
+    # Search filters
     state = request.args.get("state", "").strip()
     district = request.args.get("district", "").strip()
     commodity = request.args.get("commodity", "").strip()
     market = request.args.get("market", "").strip()
 
-    if not DATA_GOV_API_KEY:
-        error = "Mandi API key nahi mili. Configuration check karein."
+    # Search button dabane par hi API request chalegi
+    searched = request.args.get("search") == "1"
 
-    else:
-        params = {
-            "api-key": DATA_GOV_API_KEY,
-            "format": "json",
-            "offset": 0,
-            "limit": 100,
-        }
+    if searched:
 
-        if state:
-            params["filters[state]"] = state
+        if not DATA_GOV_API_KEY:
+            error = "Mandi API key nahi mili. Configuration check karein."
 
-        if district:
-            params["filters[district]"] = district
+        else:
+            params = {
+                "api-key": DATA_GOV_API_KEY,
+                "format": "json",
+                "offset": 0,
+                "limit": 100,
+            }
 
-        if commodity:
-            params["filters[commodity]"] = commodity
+            # Apply filters
+            if state:
+                params["filters[state]"] = state
 
-        if market:
-            params["filters[market]"] = market
+            if district:
+                params["filters[district]"] = district
 
-        data = None
+            if commodity:
+                params["filters[commodity]"] = commodity
 
-        for attempt in range(3):
-            try:
-                response = requests.get(
-                    MANDI_API_URL,
-                    params=params,
-                    timeout=(10, 30),
-                )
+            if market:
+                params["filters[market]"] = market
 
-                response.raise_for_status()
-                data = response.json()
-
-                if data.get("error"):
-                    raise RuntimeError(data["error"])
-
-                break
-
-            except (
-                requests.exceptions.RequestException,
-                ValueError,
-                RuntimeError,
-            ) as e:
-                print(
-                    f"MANDI API ERROR (attempt {attempt + 1}/3):",
-                    type(e).__name__,
-                    str(e),
-                )
-
-                data = None
-
-                if attempt < 2:
-                    time.sleep(2 ** (attempt + 1))
-                else:
-                    error = (
-                        "Mandi prices abhi load nahi ho pa rahe hain. "
-                        "Kripya kuch der baad dobara try karein."
-                    )
-
-        if data is not None:
-            for item in data.get("records", []):
-                modal_price = item.get("modal_price")
-
+            # API request with retry
+            for attempt in range(3):
                 try:
-                    price_per_kg = (
-                        round(float(modal_price) / 100, 2)
-                        if modal_price not in ("", None)
-                        else None
+                    data = fetch_mandi_data(params)
+                    break
+
+                except (
+                    requests.exceptions.RequestException,
+                    subprocess.SubprocessError,
+                    ValueError,
+                    RuntimeError,
+                ) as e:
+
+                    print(
+                        f"MANDI API ERROR "
+                        f"(attempt {attempt + 1}/3): "
+                        f"{type(e).__name__}: {e}"
                     )
-                except (ValueError, TypeError):
-                    price_per_kg = None
 
-                prices.append({
-                    "crop": item.get("commodity", "Unknown"),
-                    "state": item.get("state", ""),
-                    "district": item.get("district", ""),
-                    "market": item.get("market", ""),
-                    "variety": item.get("variety", ""),
-                    "arrival_date": item.get("arrival_date", ""),
-                    "min_price": item.get("min_price", ""),
-                    "max_price": item.get("max_price", ""),
-                    "price": modal_price if modal_price is not None else "",
-                    "price_per_kg": price_per_kg,
-                    "unit": "per quintal",
-                    "source": "data.gov.in / AGMARKNET",
-                })
+                    data = None
 
-            if not prices and not error:
-                error = "Is selection ke liye mandi data nahi mila."
+                    if attempt < 2:
+                        time.sleep(2 ** (attempt + 1))
+                    else:
+                        error = (
+                            "Mandi prices abhi load nahi ho pa rahe hain. "
+                            "Kripya kuch der baad dobara try karein."
+                        )
+
+            # Convert API records into template data
+            if data is not None:
+
+                for item in data.get("records", []):
+
+                    modal_price = item.get("modal_price")
+
+                    try:
+                        price_per_kg = (
+                            round(float(modal_price) / 100, 2)
+                            if modal_price not in ("", None)
+                            else None
+                        )
+                    except (ValueError, TypeError):
+                        price_per_kg = None
+
+                    prices.append({
+                        "crop": item.get("commodity", "Unknown"),
+                        "state": item.get("state", ""),
+                        "district": item.get("district", ""),
+                        "market": item.get("market", ""),
+                        "variety": item.get("variety", ""),
+                        "arrival_date": item.get("arrival_date", ""),
+                        "min_price": item.get("min_price", ""),
+                        "max_price": item.get("max_price", ""),
+                        "price": (
+                            modal_price
+                            if modal_price is not None
+                            else ""
+                        ),
+                        "price_per_kg": price_per_kg,
+                        "unit": "per quintal",
+                        "source": "data.gov.in / AGMARKNET",
+                    })
+
+                if not prices and not error:
+                    error = "Is selection ke liye mandi data nahi mila."
 
     return render_template(
         "mandi.html",
@@ -1217,13 +1297,18 @@ def mandi():
         district=district,
         commodity=commodity,
         market=market,
+        searched=searched,
     )
+
+
+
 # ---------------- KISAN YOJANA ----------------
 
 @app.route("/yojana")
 def yojana():
     return render_template("yojana.html")
 # ================= CROP DISEASE SEED DATA =================
+
 
 def seed_crop_diseases():
     conn = get_db()
