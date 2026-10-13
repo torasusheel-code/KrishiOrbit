@@ -1,0 +1,260 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f1f7ed;
+    color: #294532;
+    line-height: 1.6;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    padding: 18px 6%;
+    background: #226d3b;
+}
+
+.brand {
+    color: white;
+    text-decoration: none;
+    font-size: 23px;
+    font-weight: bold;
+}
+
+.navbar nav {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.navbar nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.navbar nav a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    width: 92%;
+    max-width: 950px;
+    margin: 35px auto;
+}
+
+.hero {
+    margin-bottom: 25px;
+}
+
+.eyebrow {
+    color: #278047;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+}
+
+.hero h1 {
+    margin: 8px 0;
+    color: #246d3c;
+    font-size: 34px;
+}
+
+.hero p {
+    color: #748174;
+}
+
+.tracking-card,
+.result-card {
+    margin-bottom: 25px;
+    padding: 28px;
+    background: white;
+    border: 1px solid #dce9d8;
+    border-radius: 16px;
+    box-shadow: 0 6px 22px rgba(30, 70, 40, 0.05);
+}
+
+.tracking-card h2 {
+    margin-top: 0;
+    color: #285c36;
+}
+
+.tracking-card label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.tracking-card input {
+    display: block;
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 16px;
+    border: 1px solid #ceddca;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.tracking-card input:focus {
+    outline: 2px solid #b8dfbd;
+    border-color: #267b41;
+}
+
+.tracking-card button {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    background: #267b41;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.tracking-card button:hover {
+    background: #195b2d;
+}
+
+.error-message {
+    margin-top: 18px;
+    padding: 12px;
+    border: 1px solid #f0c3c0;
+    border-radius: 8px;
+    background: #fff0ef;
+    color: #a52822;
+}
+
+.result-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+}
+
+.result-heading h2 {
+    margin: 5px 0;
+    color: #285c36;
+}
+
+.status-badge {
+    padding: 8px 13px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-badge.pending {
+    background: #fff4d8;
+    color: #946300;
+}
+
+.status-badge.in-progress {
+    background: #e6efff;
+    color: #2859a5;
+}
+
+.status-badge.resolved {
+    background: #e4f6e7;
+    color: #24753a;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+}
+
+.detail-item {
+    padding: 15px;
+    background: #f7faf5;
+    border: 1px solid #e5ede1;
+    border-radius: 9px;
+    overflow-wrap: anywhere;
+}
+
+.detail-item span {
+    display: block;
+    margin-bottom: 5px;
+    color: #7a8878;
+    font-size: 12px;
+}
+
+.detail-item strong {
+    font-size: 14px;
+}
+
+.description-box,
+.reply-box {
+    margin-top: 22px;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.description-box {
+    background: #f5faf2;
+    border-left: 4px solid #2b8145;
+}
+
+.reply-box {
+    background: #eef5ff;
+    border-left: 4px solid #4679bf;
+}
+
+.description-box h3,
+.reply-box h3 {
+    margin-top: 0;
+    font-size: 16px;
+}
+
+.description-box p,
+.reply-box p {
+    margin-bottom: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.waiting {
+    color: #788477;
+}
+
+.submitted-date {
+    margin-top: 20px;
+    color: #7a8878;
+    font-size: 12px;
+}
+
+footer {
+    padding: 20px 0;
+    color: #7a8878;
+    text-align: center;
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+    .hero h1 {
+        font-size: 27px;
+    }
+
+    .tracking-card,
+    .result-card {
+        padding: 20px;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .navbar {
+        padding: 16px 5%;
+    }
+}

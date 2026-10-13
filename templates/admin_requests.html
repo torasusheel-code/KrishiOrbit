@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard | KrishiOrbit</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='admin.css') }}">
+</head>
+
+<body class="dashboard-page">
+
+<div class="dashboard-container">
+
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div>
+            <span class="dashboard-label">FARMER SUPPORT MANAGEMENT</span>
+            <h1>🌾 KrishiOrbit Admin</h1>
+            <p>Manage farmer problems and provide assistance.</p>
+        </div>
+
+        <a href="{{ url_for('admin_logout') }}" class="logout-btn">
+            ↪ Logout
+        </a>
+    </header>
+
+    <!-- Dashboard Statistics -->
+    <section class="stats-grid">
+
+        <div class="stat-card total-card">
+            <div class="stat-icon">📋</div>
+            <div>
+                <p>Total Requests</p>
+                <h2>{{ total }}</h2>
+            </div>
+        </div>
+
+        <div class="stat-card pending-card">
+            <div class="stat-icon">⏳</div>
+            <div>
+                <p>Pending</p>
+                <h2>{{ pending }}</h2>
+            </div>
+        </div>
+
+        <div class="stat-card progress-card">
+            <div class="stat-icon">🔄</div>
+            <div>
+                <p>In Progress</p>
+                <h2>{{ in_progress }}</h2>
+            </div>
+        </div>
+
+        <div class="stat-card resolved-card">
+            <div class="stat-icon">✅</div>
+            <div>
+                <p>Resolved</p>
+                <h2>{{ resolved }}</h2>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Farmer Requests -->
+    <section class="requests-section">
+
+        <div class="section-heading">
+            <div>
+                <h2>All Farmer Problems</h2>
+                <p>Review requests and respond to farmers.</p>
+            </div>
+
+            <span class="request-count">
+                {{ total }} Requests
+            </span>
+        </div>
+
+        {% if requests %}
+
+        <div class="table-wrapper">
+            <table class="requests-table">
+
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>Farmer</th>
+                        <th>Location</th>
+                        <th>Crop</th>
+                        <th>Problem Type</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in requests %}
+
+                    <tr>
+                        <td>
+                            <span class="request-id">
+                                #{{ item["id"] }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ item["farmer_name"] or "Farmer" }}
+                            </strong>
+
+                            <small class="mobile-text">
+                                {{ item["mobile"] or "Mobile not provided" }}
+                            </small>
+                        </td>
+
+                        <td>
+                            <span class="location-text">
+                                📍 {{ item["district"] }}
+                            </span>
+                            <small class="mobile-text">
+                                {{ item["state"] }}
+                            </small>
+                        </td>
+
+                        <td>{{ item["crop_name"] }}</td>
+
+                        <td>{{ item["problem_type"] }}</td>
+
+                        <td>
+                            <span class="status-badge
+                                {% if item['status'] == 'Resolved' %}
+                                    status-resolved
+                                {% elif item['status'] == 'In Progress' %}
+                                    status-progress
+                                {% else %}
+                                    status-pending
+                                {% endif %}">
+                                {{ item["status"] }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <a class="view-btn"
+                               href="{{ url_for('admin_request_detail', request_id=item['id']) }}">
+                                View / Reply →
+                            </a>
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+            <div class="empty-icon">🌱</div>
+            <h3>No farmer requests yet</h3>
+            <p>Submitted farmer problems will appear here.</p>
+        </div>
+
+        {% endif %}
+
+    </section>
+
+    <footer class="dashboard-footer">
+        <p>🌾 KrishiOrbit — Helping Farmers Grow Better</p>
+    </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,22 +1,52 @@
-from flask import Flask, render_template, request
+from flask import (
+    Flask, render_template, request, redirect,
+    url_for, session, flash
+)
 import sqlite3
 import os
 from datetime import date
 import requests
 from dotenv import load_dotenv
 import time
-
 import json
 import subprocess
+from functools import wraps
+from werkzeug.utils import secure_filename
+import uuid
+
 load_dotenv()
 
-
 app = Flask(__name__)
-# Weather cache
-WEATHER_CACHE = {}
-WEATHER_CACHE_SECONDS = 1800  # 30 minutes
+
+# ---------------- ADMIN CONFIGURATION ----------------
+
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+
+app.secret_key = os.environ.get("SECRET_KEY")
+
+# ---------------- DATABASE CONFIGURATION ----------------
 
 DATABASE = os.path.join(app.root_path, "KrishiOrbit.db")
+
+# ---------------- FARMER IMAGE UPLOAD CONFIGURATION ----------------
+
+UPLOAD_FOLDER = os.path.join(
+    app.root_path, "static", "uploads"
+)
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
+
+MAX_IMAGE_SIZE = 5 * 1024 * 1024
+
+app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
+
+# ---------------- WEATHER CONFIGURATION ----------------
+
+WEATHER_CACHE = {}
+WEATHER_CACHE_SECONDS = 1800
 
 DATA_GOV_API_KEY = os.getenv("DATA_GOV_API_KEY")
 # ---------------- DATABASE ----------------
@@ -140,7 +170,9 @@ def get_sowing_recommendation(crop, state, district):
         "source": row["source"],
         "verified": True
     }
+
 # ---------------- DATABASE INITIALIZATION ----------------
+
 def init_db():
     conn = sqlite3.connect(DATABASE)
     print("INIT_DB DATABASE PATH:", os.path.abspath(DATABASE))
@@ -174,7 +206,7 @@ def init_db():
             )
         """)
 
-        # 3. Create crop disease table
+        # 3. Create crop diseases table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS crop_diseases (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -186,21 +218,42 @@ def init_db():
             )
         """)
 
-        # 4. Add source column if missing
+        # 4. Create farmer requests table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS farmer_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                farmer_name TEXT,
+                mobile TEXT,
+                state TEXT NOT NULL,
+                district TEXT NOT NULL,
+                crop_name TEXT NOT NULL,
+                problem_type TEXT NOT NULL,
+                description TEXT NOT NULL,
+                image_filename TEXT,
+                status TEXT NOT NULL DEFAULT 'Pending',
+                admin_reply TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # 5. Add source column to crop_diseases if missing
         disease_columns = {
-            row[1] for row in cursor.execute(
+            row[1]
+            for row in cursor.execute(
                 "PRAGMA table_info(crop_diseases)"
             ).fetchall()
         }
 
         if "source" not in disease_columns:
             cursor.execute("""
-                ALTER TABLE crop_diseases ADD COLUMN source TEXT
+                ALTER TABLE crop_diseases
+                ADD COLUMN source TEXT
             """)
 
-        # 5. Add recommended_period column if missing
+        # 6. Add recommended_period column if missing
         sowing_columns = {
-            row[1] for row in cursor.execute(
+            row[1]
+            for row in cursor.execute(
                 "PRAGMA table_info(sowing_calendar)"
             ).fetchall()
         }
@@ -211,7 +264,7 @@ def init_db():
                 ADD COLUMN recommended_period TEXT
             """)
 
-        # 6. Insert Rajouri Maize record if missing
+        # 7. Insert Rajouri Maize record if missing
         cursor.execute("""
             SELECT COUNT(*)
             FROM sowing_calendar
@@ -223,9 +276,15 @@ def init_db():
         if cursor.fetchone()[0] == 0:
             cursor.execute("""
                 INSERT INTO sowing_calendar (
-                    crop_name, state, district, variety,
-                    sowing_start, sowing_end, source,
-                    verified, recommended_period
+                    crop_name,
+                    state,
+                    district,
+                    variety,
+                    sowing_start,
+                    sowing_end,
+                    source,
+                    verified,
+                    recommended_period
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
@@ -240,57 +299,77 @@ def init_db():
                 "Not verified"
             ))
 
-        # 7. Crop master data
+        # 8. Crop master data
         crops = [
             (
-                "Wheat", "Rabi", "110-150 days",
+                "Wheat",
+                "Rabi",
+                "110-150 days",
                 "Wheat is an important cereal crop used to make flour."
             ),
             (
-                "Rice", "Kharif", "90-150 days",
+                "Rice",
+                "Kharif",
+                "90-150 days",
                 "Rice is a major food crop that requires sufficient water for growth."
             ),
             (
-                "Maize", "Kharif", "80-120 days",
+                "Maize",
+                "Kharif",
+                "80-120 days",
                 "Maize is used for both human food and animal feed."
             ),
             (
-                "Mustard", "Rabi", "100-150 days",
+                "Mustard",
+                "Rabi",
+                "100-150 days",
                 "Mustard is an important oilseed crop grown for its seeds and oil."
             ),
             (
-                "Potato", "Season varies by region", "70-120 days",
+                "Potato",
+                "Season varies by region",
+                "70-120 days",
                 "Potatoes grow best in suitable soil with good drainage."
             ),
             (
-                "Tomato", "Season varies by region", "90-150 days",
+                "Tomato",
+                "Season varies by region",
+                "90-150 days",
                 "Tomato is a vegetable crop used in many dishes."
             ),
             (
-                "Onion", "Rabi / Kharif", "100-150 days",
+                "Onion",
+                "Rabi / Kharif",
+                "100-150 days",
                 "Onion is an important vegetable used in everyday cooking."
             ),
             (
-                "Gram", "Rabi", "90-120 days",
+                "Gram",
+                "Rabi",
+                "90-120 days",
                 "Gram is a pulse crop and an important source of protein."
             ),
             (
-                "Peas", "Rabi", "60-90 days",
+                "Peas",
+                "Rabi",
+                "60-90 days",
                 "Peas are a cool-season vegetable and pulse crop."
             ),
             (
-                "Soybean", "Kharif", "90-120 days",
+                "Soybean",
+                "Kharif",
+                "90-120 days",
                 "Soybean is an oilseed and protein-rich legume crop."
             ),
             (
-    "Bajra",
-    "Kharif",
-    "75-100 days",
-    "Bajra is a drought-tolerant millet crop that grows well in warm conditions."
-),
+                "Bajra",
+                "Kharif",
+                "75-100 days",
+                "Bajra is a drought-tolerant millet crop that grows well in warm conditions."
+            )
         ]
 
-        # 8. Insert only crops that do not already exist
+        # 9. Insert only crops that do not already exist
         for crop in crops:
             cursor.execute("""
                 SELECT COUNT(*)
@@ -300,11 +379,18 @@ def init_db():
 
             if cursor.fetchone()[0] == 0:
                 cursor.execute("""
-                    INSERT INTO crops (name, season, duration, description)
+                    INSERT INTO crops (
+                        name,
+                        season,
+                        duration,
+                        description
+                    )
                     VALUES (?, ?, ?, ?)
                 """, crop)
 
+        # 10. Commit all database changes
         conn.commit()
+
         print("Database initialized successfully.")
         print("Crop data checked successfully.")
 
@@ -315,6 +401,8 @@ def init_db():
 
     finally:
         conn.close()
+
+
 # ---------------- HOME PAGE ----------------
 
 @app.route("/")
@@ -1410,6 +1498,188 @@ def calculator():
         result=result,
         error=error
     )
+
+# ================= ADMIN LOGIN =================
+
+@app.route("/admin-login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        print("Username configured:", bool(ADMIN_USERNAME))
+        print("Password configured:", bool(ADMIN_PASSWORD))
+
+        if (
+            ADMIN_USERNAME
+            and ADMIN_PASSWORD
+            and username == ADMIN_USERNAME
+            and password == ADMIN_PASSWORD
+        ):
+            session.clear()
+            session["admin_logged_in"] = True
+
+            return redirect(url_for("admin_requests"))
+
+        return render_template(
+            "admin_login.html",
+            error="Invalid username or password."
+        ), 401
+
+    return render_template("admin_login.html")
+
+
+def admin_required(view_function):
+    @wraps(view_function)
+    def wrapped_view(*args, **kwargs):
+        if not session.get("admin_logged_in"):
+            return redirect(url_for("admin_login"))
+
+        return view_function(*args, **kwargs)
+
+    return wrapped_view
+# ================= ADMIN LOGOUT =================
+
+@app.route("/admin-logout")
+def admin_logout():
+    session.clear()
+    return redirect(url_for("admin_login"))
+
+@app.route("/admin/requests")
+@admin_required
+def admin_requests():
+    conn = get_db()
+
+    try:
+        requests_list = conn.execute("""
+            SELECT *
+            FROM farmer_requests
+            ORDER BY created_at DESC
+        """).fetchall()
+
+        total = len(requests_list)
+
+        pending = sum(
+            1 for item in requests_list
+            if item["status"] == "Pending"
+        )
+
+        in_progress = sum(
+            1 for item in requests_list
+            if item["status"] == "In Progress"
+        )
+
+        resolved = sum(
+            1 for item in requests_list
+            if item["status"] == "Resolved"
+        )
+
+        return render_template(
+            "admin_requests.html",
+            requests=requests_list,
+            total=total,
+            pending=pending,
+            in_progress=in_progress,
+            resolved=resolved
+        )
+
+    finally:
+        conn.close()
+
+# ================= REQUEST DETAIL =================
+
+@app.route("/admin/request/<int:request_id>", methods=["GET", "POST"])
+@admin_required
+def admin_request_detail(request_id):
+    conn = get_db()
+
+    try:
+        item = conn.execute(
+            "SELECT * FROM farmer_requests WHERE id = ?",
+            (request_id,)
+        ).fetchone()
+
+        if item is None:
+            return "Request not found", 404
+
+        if request.method == "POST":
+            status = request.form.get("status", "").strip()
+            admin_reply = request.form.get("admin_reply", "").strip()
+
+            allowed_statuses = {
+                "Pending",
+                "In Progress",
+                "Resolved"
+            }
+
+            if status not in allowed_statuses:
+                return "Invalid status", 400
+
+            if len(admin_reply) > 3000:
+                return "Reply is too long", 400
+
+            conn.execute("""
+                UPDATE farmer_requests
+                SET status = ?, admin_reply = ?
+                WHERE id = ?
+            """, (status, admin_reply, request_id))
+
+            conn.commit()
+
+            return redirect(
+                url_for(
+                    "admin_request_detail",
+                    request_id=request_id
+                )
+            )
+
+        return render_template(
+            "admin_request_detail.html",
+            item=item
+        )
+
+    finally:
+        conn.close()
+
+# ================= FARMER REQUEST TRACKING =================
+
+@app.route("/track-request", methods=["GET", "POST"])
+def track_request():
+    item = None
+    error = None
+
+    if request.method == "POST":
+        request_id = request.form.get("request_id", "").strip()
+
+        if not request_id.isdigit():
+            error = "Please enter a valid Request ID."
+        else:
+            conn = get_db()
+
+            try:
+                item = conn.execute("""
+                    SELECT id, state, district, crop_name,
+                           problem_type, description, status,
+                           admin_reply, created_at
+                    FROM farmer_requests
+                    WHERE id = ?
+                """, (int(request_id),)).fetchone()
+
+                if item is None:
+                    error = "Request not found. Please check your Request ID."
+
+            except sqlite3.Error:
+                app.logger.exception("Request tracking database error")
+                error = "Unable to check your request right now."
+
+            finally:
+                conn.close()
+
+    return render_template(
+        "track_request.html",
+        item=item,
+        error=error
+    )
 # ================= CROP DISEASE SEED DATA =================
 
 
@@ -1476,6 +1746,198 @@ def seed_crop_diseases():
 
     finally:
         conn.close()
+
+        # ---------------- FARMER HELP ----------------
+
+@app.route("/farmer-help", methods=["GET", "POST"])
+def farmer_help():
+
+    if request.method == "POST":
+
+        farmer_name = request.form.get(
+            "farmer_name", ""
+        ).strip()
+
+        mobile = request.form.get(
+            "mobile", ""
+        ).strip()
+
+        state = request.form.get(
+            "state", ""
+        ).strip()
+
+        district = request.form.get(
+            "district", ""
+        ).strip()
+
+        crop_name = request.form.get(
+            "crop_name", ""
+        ).strip()
+
+        problem_type = request.form.get(
+            "problem_type", ""
+        ).strip()
+
+        description = request.form.get(
+            "description", ""
+        ).strip()
+
+        # Validate required fields
+        if not all([
+            state,
+            district,
+            crop_name,
+            problem_type,
+            description
+        ]):
+            return render_template(
+                "farmer_help.html",
+                error="Please fill in all required fields."
+            ), 400
+
+        if len(description) > 3000:
+            return render_template(
+                "farmer_help.html",
+                error="Description must be 3000 characters or fewer."
+            ), 400
+
+        if len(farmer_name) > 100 or len(district) > 100:
+            return render_template(
+                "farmer_help.html",
+                error="Please check the name and district fields."
+            ), 400
+
+        if mobile and (
+            len(mobile) != 10 or not mobile.isdigit()
+        ):
+            return render_template(
+                "farmer_help.html",
+                error="Please enter a valid 10-digit mobile number."
+            ), 400
+
+        # ---------------- IMAGE VALIDATION ----------------
+
+        image = request.files.get("problem_image")
+        image_filename = None
+        image_path = None
+
+        if image and image.filename:
+
+            original_filename = secure_filename(image.filename)
+
+            if (
+                not original_filename
+                or "." not in original_filename
+            ):
+                return render_template(
+                    "farmer_help.html",
+                    error="Please upload a valid image file."
+                ), 400
+
+            extension = original_filename.rsplit(
+                ".", 1
+            )[1].lower()
+
+            if extension not in ALLOWED_EXTENSIONS:
+                return render_template(
+                    "farmer_help.html",
+                    error="Only JPG, JPEG, PNG and WebP images are allowed."
+                ), 400
+
+            # Check actual uploaded file size
+            image.seek(0, os.SEEK_END)
+            image_size = image.tell()
+            image.seek(0)
+
+            if image_size == 0:
+                return render_template(
+                    "farmer_help.html",
+                    error="The uploaded image is empty."
+                ), 400
+
+            if image_size > MAX_IMAGE_SIZE:
+                return render_template(
+                    "farmer_help.html",
+                    error="Image size must not exceed 5 MB."
+                ), 400
+
+            # Generate a unique filename
+            image_filename = (
+                f"{uuid.uuid4().hex}.{extension}"
+            )
+
+            image_path = os.path.join(
+                UPLOAD_FOLDER,
+                image_filename
+            )
+
+        # ---------------- SAVE REQUEST ----------------
+
+        conn = get_db()
+
+        try:
+            # Save image first, if provided
+            if image and image_filename:
+                image.save(image_path)
+
+            cursor = conn.execute("""
+                INSERT INTO farmer_requests (
+                    farmer_name,
+                    mobile,
+                    state,
+                    district,
+                    crop_name,
+                    problem_type,
+                    description,
+                    image_filename
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                farmer_name or None,
+                mobile or None,
+                state,
+                district,
+                crop_name,
+                problem_type,
+                description,
+                image_filename
+            ))
+
+            request_id = cursor.lastrowid
+
+            conn.commit()
+
+        except Exception:
+            conn.rollback()
+
+            # Remove newly saved image if database saving fails
+            if image_path and os.path.isfile(image_path):
+                try:
+                    os.remove(image_path)
+                except OSError:
+                    app.logger.exception(
+                        "Could not remove unused uploaded image"
+                    )
+
+            app.logger.exception(
+                "Failed to save farmer support request"
+            )
+
+            return render_template(
+                "farmer_help.html",
+                error="Your request could not be saved. Please try again."
+            ), 500
+
+        finally:
+            conn.close()
+
+        return render_template(
+            "farmer_help.html",
+            success=True,
+            request_id=request_id
+        )
+
+    return render_template("farmer_help.html")
 
         # ---------------- SOWING CALENDAR MIGRATION ----------------
 
@@ -1718,88 +2180,147 @@ def update_jammu_sowing_calendar():
     # Department's district-wise sowing calendar.
     #
     # Format: (start_month, end_month, displayed_period)
-
     district_periods = {
-        "Jammu": {
-            "Rice": (6, 7, "June–July"),
-            "Maize": (3, 6, "March–June"),
-            "Wheat": (10, 1, "October–January"),
-            "Mustard":(5, 6, "May–June") ,
-                        "Potato": (5, 6, "May–June")
-        },
+    "Jammu": {
+        "Rice": (6, 7, "June–July"),
+        "Maize": (3, 6, "March–June"),
+        "Wheat": (10, 12, "October–December"),
+        "Mustard": (10, 11, "October–November"),
+        "Potato": (2, 3, "February–March"),
+        "Tomato": (2, 3, "February–March"),
+        "Onion": (11, 1, "November–January"),
+        "Gram": (10, 11, "October–November"),
+        "Peas": (10, 11, "October–November"),
+        "Soybean": (6, 7, "June–July"),
+        "Bajra": (6, 7, "June–July")
+    },
 
-        "Samba": {
-            "Rice": (6, 7, "June–July"),
-            "Maize": (3, 6, "March–June"),
-            "Wheat": (10, 1, "October–January"),
-            "Mustard":(5, 6, "May–June") ,
-                        "Potato": (5, 6, "May–June")
-        },
+    "Samba": {
+        "Rice": (6, 7, "June–July"),
+        "Maize": (3, 6, "March–June"),
+        "Wheat": (10, 12, "October–December"),
+        "Mustard": (10, 11, "October–November"),
+        "Potato": (2, 3, "February–March"),
+        "Tomato": (2, 3, "February–March"),
+        "Onion": (11, 1, "November–January"),
+        "Gram": (10, 11, "October–November"),
+        "Peas": (10, 11, "October–November"),
+        "Soybean": (6, 7, "June–July"),
+        "Bajra": (6, 7, "June–July")
+    },
 
-        "Kathua": {
-            "Rice": (6, 7, "June–July"),
-            "Maize": (3, 6, "March–June"),
-            "Wheat": (10, 1, "October–January"),
-            "Mustard":(5, 6, "May–June") ,
-                        "Potato": (5, 6, "May–June")
-        },
+    "Kathua": {
+        "Rice": (6, 7, "June–July"),
+        "Maize": (3, 6, "March–June"),
+        "Wheat": (10, 12, "October–December"),
+        "Mustard": (10, 11, "October–November"),
+        "Potato": (2, 3, "February–March"),
+        "Tomato": (2, 3, "February–March"),
+        "Onion": (11, 1, "November–January"),
+        "Gram": (10, 11, "October–November"),
+        "Peas": (10, 11, "October–November"),
+        "Soybean": (6, 7, "June–July"),
+        "Bajra": (6, 7, "June–July")
+    },
 
-        "Udhampur": {
-            "Rice": (6, 7, "June–July"),
-            "Maize": (3, 6, "March–June"),
-            "Wheat": (10, 1, "October–January"),
-            "Mustard":(5, 6, "May–June") ,
-                        "Potato": (5, 6, "May–June")
-        },
+    "Udhampur": {
+        "Rice": (6, 7, "June–July"),
+        "Maize": (4, 5, "April–May"),
+        "Wheat": (10, 12, "October–December"),
+        "Mustard": (10, 11, "October–November"),
+        "Potato": (2, 3, "February–March"),
+        "Tomato": (2, 3, "February–March"),
+        "Onion": (11, 1, "November–January"),
+        "Gram": (10, 11, "October–November"),
+        "Peas": (10, 11, "October–November"),
+        "Soybean": (6, 7, "June–July"),
+        "Bajra": (6, 7, "June–July")
+    },
 
-        "Ramban": {
-            "Rice": (5, 6, "May–June"),
-            "Maize": (4, 5, "April–May"),
-            "Wheat": (10, 12, "October–December"),
-            "Mustard":(5, 6, "May–June") ,
-                        "Potato": (5, 6, "May–June")
-        },
+    "Ramban": {
+        "Rice": (5, 6, "May–June"),
+        "Maize": (4, 5, "April–May"),
+        "Wheat": (10, 12, "October–December"),
+        "Mustard": (10, 11, "October–November"),
+        "Potato": (3, 4, "March–April"),
+        "Tomato": (3, 4, "March–April"),
+        "Onion": (10, 11, "October–November"),
+        "Gram": (10, 11, "October–November"),
+        "Peas": (10, 11, "October–November"),
+        "Soybean": (6, 7, "June–July"),
+        "Bajra": (6, 7, "June–July")
+    },
 
-        "Reasi": {
-            "Rice": (6, 7, "June–July"),
-            "Maize": (4, 5, "April–May"),
-            "Wheat": (10, 12, "October–December"),
-            "Mustard":(5, 6, "May–June") ,
-                        "Potato": (5, 6, "May–June")
-        },
+    "Reasi": {
+        "Rice": (6, 7, "June–July"),
+        "Maize": (4, 5, "April–May"),
+        "Wheat": (10, 12, "October–December"),
+        "Mustard": (10, 11, "October–November"),
+        "Potato": (2, 3, "February–March"),
+        "Tomato": (2, 3, "February–March"),
+        "Onion": (11, 1, "November–January"),
+        "Gram": (10, 11, "October–November"),
+        "Peas": (10, 11, "October–November"),
+        "Soybean": (6, 7, "June–July"),
+        "Bajra": (6, 7, "June–July")
+    },
 
-        "Rajouri": {
-            "Rice": (5, 6, "May–June"),
-            "Maize": (4, 5, "April–May"),
-            "Wheat": (10, 12, "October–December"),
-            "Mustard":(5, 6, "May–June") ,
-            "Potato": (5, 6, "May–June")
-        },
+    "Rajouri": {
+        "Rice": (5, 6, "May–June"),
+        "Maize": (4, 5, "April–May"),
+        "Wheat": (10, 12, "October–December"),
+        "Mustard": (10, 11, "October–November"),
+        "Potato": (3, 4, "March–April"),
+        "Tomato": (3, 4, "March–April"),
+        "Onion": (10, 11, "October–November"),
+        "Gram": (10, 11, "October–November"),
+        "Peas": (10, 11, "October–November"),
+        "Soybean": (6, 7, "June–July"),
+        "Bajra": (6, 7, "June–July")
+    },
 
-        "Doda": {
-            "Rice": (5, 6, "May–June"),
-            "Maize": (4, 5, "April–May"),
-            "Wheat": (10, 12, "October–December"),
-            "Mustard":(5, 6, "May–June") ,
-                        "Potato": (5, 6, "May–June")
-        },
+    "Doda": {
+        "Rice": (5, 6, "May–June"),
+        "Maize": (4, 5, "April–May"),
+        "Wheat": (10, 12, "October–December"),
+        "Mustard": (10, 11, "October–November"),
+        "Potato": (3, 4, "March–April"),
+        "Tomato": (3, 4, "March–April"),
+        "Onion": (10, 11, "October–November"),
+        "Gram": (10, 11, "October–November"),
+        "Peas": (10, 11, "October–November"),
+        "Soybean": (6, 7, "June–July"),
+        "Bajra": (6, 7, "June–July")
+    },
 
-        "Kishtwar": {
-            "Rice": (5, 6, "May–June"),
-            "Maize": (4, 5, "April–May"),
-            "Wheat": (10, 12, "October–December"),
-            "Mustard":(5, 6, "May–June") ,
-                        "Potato": (5, 6, "May–June")
-        },
+    "Kishtwar": {
+        "Rice": (5, 6, "May–June"),
+        "Maize": (4, 5, "April–May"),
+        "Wheat": (10, 12, "October–December"),
+        "Mustard": (10, 11, "October–November"),
+        "Potato": (3, 4, "March–April"),
+        "Tomato": (3, 4, "March–April"),
+        "Onion": (10, 11, "October–November"),
+        "Gram": (10, 11, "October–November"),
+        "Peas": (10, 11, "October–November"),
+        "Soybean": (6, 7, "June–July"),
+        "Bajra": (6, 7, "June–July")
+    },
 
-        "Poonch": {
-            "Rice": (5, 6, "May–June"),
-            "Maize": (4, 5, "April–May"),
-            "Wheat": (10, 12, "October–December"),
-            "Mustard":(5, 6, "May–June") ,
-                        "Potato": (5, 6, "May–June")
-        }
+    "Poonch": {
+        "Rice": (5, 6, "May–June"),
+        "Maize": (4, 5, "April–May"),
+        "Wheat": (10, 12, "October–December"),
+        "Mustard": (10, 11, "October–November"),
+        "Potato": (3, 4, "March–April"),
+        "Tomato": (3, 4, "March–April"),
+        "Onion": (10, 11, "October–November"),
+        "Gram": (10, 11, "October–November"),
+        "Peas": (10, 11, "October–November"),
+        "Soybean": (6, 7, "June–July"),
+        "Bajra": (6, 7, "June–July")
     }
+}
 
     source = (
         "Jammu Agriculture Department - Crop and District "
@@ -1929,7 +2450,6 @@ def initialize_application():
         update_rajouri_sowing_data()
         update_jammu_sowing_calendar()
 
-        # Verify that the table exists in the database
         conn = get_db()
 
         try:
@@ -1949,9 +2469,10 @@ def initialize_application():
             conn.close()
 
         print("Application database initialization completed.")
-        
-initialize_application()
 
+
+initialize_application()
 
 if __name__ == "__main__":
     app.run(debug=True)
+

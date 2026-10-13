@@ -10,3 +10,9 @@ venv/
 *.db
 *.sqlite
 *.sqlite3
+.env
+KrishiOrbit.db
+__pycache__/
+*.py[cod]
+static/uploads/*
+!static/uploads/.gitkeep

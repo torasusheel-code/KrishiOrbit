@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Farmer Help | KrishiOrbit</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='farmer_help.css') }}">
+</head>
+
+<body>
+
+<nav class="navbar">
+    <a href="/" class="logo">🌾 KrishiOrbit</a>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/crops">Crop Guide</a>
+        <a href="/weather">Weather</a>
+        <a href="/mandi">Mandi Prices</a>
+        <a href="/calculator">Calculator</a>
+        <a href="/farmer-help" class="active">Farmer Help</a>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="hero-content">
+        <span class="eyebrow">🌱 WE ARE HERE TO HELP</span>
+
+        <h1>Farmer Problem Resolution</h1>
+
+        <p>
+            Tell us about the problems you are facing in farming.
+            Share your crop details and get guidance to help
+            identify and address your agricultural concerns.
+        </p>
+
+        <div class="hero-tags">
+            <span>✓ Easy Submission</span>
+            <span>✓ Farmer Support</span>
+            <span>✓ Farming Guidance</span>
+        </div>
+    </div>
+
+    <div class="hero-icon">👨‍🌾</div>
+</header>
+
+<main class="container">
+
+    {% if success %}
+    <div class="message success-message">
+        <h3>✅ Problem Submitted Successfully!</h3>
+
+        <p>
+            Your request has been saved successfully.
+        </p>
+
+        <p>
+            <strong>Request ID:</strong> #{{ request_id }}
+        </p>
+
+        <p>
+            Please keep this ID for future reference.
+        </p>
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="message error-message">
+        <p>⚠️ {{ error }}</p>
+    </div>
+    {% endif %}
+
+    <section class="intro">
+        <div>
+            <span class="section-label">FARMER SUPPORT</span>
+            <h2>What Problem Are You Facing?</h2>
+
+            <p>
+                Fill out the form below and describe your problem
+                clearly so that it can be reviewed more easily.
+            </p>
+        </div>
+
+        <div class="intro-icon">🌿</div>
+    </section>
+
+    <div class="content-grid">
+
+        <section class="form-card">
+
+            <div class="card-heading">
+                <div class="card-icon">📝</div>
+
+                <div>
+                    <h3>Submit Your Problem</h3>
+                    <p>Provide details about your farming issue</p>
+                </div>
+            </div>
+
+            <form method="POST"
+                  action="{{ url_for('farmer_help') }}"
+                  enctype="multipart/form-data">
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="farmer_name">
+                            Farmer Name
+                            <span>(Optional)</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="farmer_name"
+                            name="farmer_name"
+                            maxlength="100"
+                            placeholder="Enter your name"
+                            value="{{ request.form.get('farmer_name', '') }}"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mobile">
+                            Mobile Number
+                            <span>(Optional)</span>
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="mobile"
+                            name="mobile"
+                            inputmode="numeric"
+                            pattern="[0-9]{10}"
+                            maxlength="10"
+                            placeholder="Enter your 10-digit mobile number"
+                            value="{{ request.form.get('mobile', '') }}"
+                        >
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="state">State / Union Territory</label>
+
+                        <select id="state" name="state" required>
+                            <option value="">Select State / UT</option>
+                            <option>Andhra Pradesh</option>
+                            <option>Arunachal Pradesh</option>
+                            <option>Assam</option>
+                            <option>Bihar</option>
+                            <option>Chhattisgarh</option>
+                            <option>Goa</option>
+                            <option>Gujarat</option>
+                            <option>Haryana</option>
+                            <option>Himachal Pradesh</option>
+                            <option>Jharkhand</option>
+                            <option>Karnataka</option>
+                            <option>Kerala</option>
+                            <option>Madhya Pradesh</option>
+                            <option>Maharashtra</option>
+                            <option>Manipur</option>
+                            <option>Meghalaya</option>
+                            <option>Mizoram</option>
+                            <option>Nagaland</option>
+                            <option>Odisha</option>
+                            <option>Punjab</option>
+                            <option>Rajasthan</option>
+                            <option>Sikkim</option>
+                            <option>Tamil Nadu</option>
+                            <option>Telangana</option>
+                            <option>Tripura</option>
+                            <option>Uttar Pradesh</option>
+                            <option>Uttarakhand</option>
+                            <option>West Bengal</option>
+                            <option>Andaman and Nicobar Islands</option>
+                            <option>Chandigarh</option>
+                            <option>Dadra and Nagar Haveli and Daman and Diu</option>
+                            <option>Delhi</option>
+                            <option>Jammu and Kashmir</option>
+                            <option>Ladakh</option>
+                            <option>Lakshadweep</option>
+                            <option>Puducherry</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="district">District</label>
+
+                        <input
+                            type="text"
+                            id="district"
+                            name="district"
+                            maxlength="100"
+                            placeholder="Enter your district"
+                            required
+                        >
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="crop_name">Crop Name</label>
+
+                        <select id="crop_name" name="crop_name" required>
+                            <option value="">Select Crop</option>
+                            <option>Wheat</option>
+                            <option>Rice</option>
+                            <option>Maize</option>
+                            <option>Mustard</option>
+                            <option>Potato</option>
+                            <option>Tomato</option>
+                            <option>Onion</option>
+                            <option>Gram</option>
+                            <option>Peas</option>
+                            <option>Soybean</option>
+                            <option>Bajra</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="problem_type">Problem Type</label>
+
+                        <select id="problem_type"
+                                name="problem_type"
+                                required>
+                            <option value="">Select Problem Type</option>
+                            <option>Crop Disease</option>
+                            <option>Pest Attack</option>
+                            <option>Irrigation Problem</option>
+                            <option>Seed Problem</option>
+                            <option>Fertilizer and Soil</option>
+                            <option>Weather Damage</option>
+                            <option>Mandi and Market Price</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label for="description">
+                        Detailed Problem Description
+                    </label>
+
+                    <textarea
+    id="description"
+    name="description"
+    rows="6"
+    maxlength="3000"
+    placeholder="Describe the crop problem, when it started, and any symptoms you have noticed..."
+    required
+></textarea>
+
+                    <small>
+                        Providing clear and detailed information
+                        will help us understand your problem better.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="problem_image">
+                        Crop Photo
+                        <span>(Optional, JPG/PNG/WebP)</span>
+                    </label>
+
+                    <input
+                        type="file"
+                        id="problem_image"
+                        name="problem_image"
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    >
+
+                    <small>
+                        Please upload only photos of your crop.
+                    </small>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span>Submit Problem</span>
+                    <span>→</span>
+                </button>
+
+            </form>
+
+        </section>
+
+        <aside class="info-card">
+
+            <div class="info-icon">🌱</div>
+
+            <h3>Tips for Better Guidance</h3>
+

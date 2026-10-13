@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Farmer Problem Details | KrishiOrbit</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='admin.css') }}">
+</head>
+
+<body class="dashboard-page">
+
+<div class="detail-container">
+
+    <!-- Header -->
+    <header class="detail-header">
+        <div>
+            <span class="dashboard-label">FARMER SUPPORT</span>
+            <h1>🌾 Problem Details</h1>
+            <p>Review the farmer's problem and provide guidance.</p>
+        </div>
+
+        <a href="{{ url_for('admin_requests') }}" class="back-btn">
+            ← Back to Dashboard
+        </a>
+    </header>
+
+
+    <!-- Farmer Information -->
+    <section class="detail-card">
+
+        <h2>👨‍🌾 Farmer Information</h2>
+
+        <div class="detail-grid">
+
+            <div class="detail-item">
+                <span>Request ID</span>
+                <strong>#{{ item["id"] }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Farmer Name</span>
+                <strong>{{ item["farmer_name"] or "Not provided" }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Mobile Number</span>
+                <strong>{{ item["mobile"] or "Not provided" }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>State / UT</span>
+                <strong>{{ item["state"] }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>District</span>
+                <strong>{{ item["district"] }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Crop</span>
+                <strong>{{ item["crop_name"] }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Problem Type</span>
+                <strong>{{ item["problem_type"] }}</strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Current Status</span>
+                <strong class="current-status">
+                    {{ item["status"] }}
+                </strong>
+            </div>
+
+            <div class="detail-item">
+                <span>Submitted On</span>
+                <strong>{{ item["created_at"] }}</strong>
+            </div>
+
+        </div>
+
+
+        <!-- Farmer's Problem Description -->
+        <div class="problem-description">
+
+            <h4>📝 Farmer's Problem Description</h4>
+
+            <p>
+                {{ item["description"] or "No description provided." }}
+            </p>
+
+        </div>
+
+
+        <!-- Farmer's Uploaded Crop Image -->
+        {% if item["image_filename"] %}
+
+        <div class="problem-image-section">
+
+            <h4>🌱 Farmer's Uploaded Crop Image</h4>
+
+            <a
+                href="{{ url_for('static', filename='uploads/' + item['image_filename']) }}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <img
+                    src="{{ url_for('static', filename='uploads/' + item['image_filename']) }}"
+                    alt="Farmer's Uploaded Crop"
+                    class="problem-image"
+                >
+            </a>
+
+            <p class="image-hint">
+                Click on the image to view it in full size.
+            </p>
+
+        </div>
+
+        {% else %}
+
+        <div class="no-image-message">
+            📷 No crop image was uploaded by the farmer.
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- Admin Reply Form -->
+    <section class="detail-card reply-card">
+
+        <h2>💬 Admin Reply & Status Update</h2>
+
+        <p class="section-description">
+            Write guidance for the farmer and update the request status.
+        </p>
+
+        <form method="POST"
+              action="{{ url_for('admin_request_detail', request_id=item['id']) }}">
+
+            <label for="status">Update Status</label>
+
+            <select id="status" name="status" required>
+
+                <option value="Pending"
+                    {% if item["status"] == "Pending" %}selected{% endif %}>
+                    Pending
+                </option>
+
+                <option value="In Progress"
+                    {% if item["status"] == "In Progress" %}selected{% endif %}>
+                    In Progress
+                </option>
+
+                <option value="Resolved"
+                    {% if item["status"] == "Resolved" %}selected{% endif %}>
+                    Resolved
+                </option>
+
+            </select>
+
+
+            <label for="admin_reply">Reply to Farmer</label>
+
+            <textarea
+                id="admin_reply"
+                name="admin_reply"
+                rows="6"
+                maxlength="3000"
+                placeholder="Write helpful guidance for the farmer..."
+            >{{ item["admin_reply"] or "" }}</textarea>
+
+
+            <div class="reply-actions">
+
+                <button type="submit" class="save-btn">
+                    💾 Save Reply & Status
+                </button>
+
+                <a href="{{ url_for('admin_requests') }}"
+                   class="cancel-btn">
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <footer class="dashboard-footer">
+        🌾 KrishiOrbit — Helping Farmers Grow Better
+    </footer>
+
+</div>
+
+</body>
+</html>
