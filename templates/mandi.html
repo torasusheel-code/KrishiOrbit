@@ -346,15 +346,20 @@
 
                 <div class="price-box">
 
-                    <span class="price-label">Modal Price</span>
+    <span class="price-label">Modal Price</span>
 
-                    <div class="price-value">
-                        ₹{{ item.price if item.price not in ['', None] else 'N/A' }}
-                    </div>
+    <div class="price-value">
+        ₹{{ item.price if item.price not in ['', None] else 'N/A' }}
+    </div>
 
-                    <span class="price-unit">per quintal</span>
+    <span class="price-unit">per quintal</span>
 
-                </div>
+    <div class="price-per-kg">
+        ₹{{ "%.2f"|format(item.price_per_kg) if item.price_per_kg is not none else 'N/A' }}
+        <span>per kg</span>
+    </div>
+
+</div>
 
 
                 <div class="price-comparison">

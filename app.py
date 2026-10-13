@@ -4,16 +4,18 @@ import os
 from datetime import date
 import requests
 from dotenv import load_dotenv
+import time
 
+import json
+import subprocess
 load_dotenv()
 
-DATA_GOV_API_KEY = os.getenv("DATA_GOV_API_KEY")
 
 app = Flask(__name__)
 
 DATABASE = os.path.join(app.root_path, "KrishiOrbit.db")
 
-
+DATA_GOV_API_KEY = os.getenv("DATA_GOV_API_KEY")
 # ---------------- DATABASE ----------------
 
 def get_db():
@@ -1108,7 +1110,6 @@ MANDI_API_URL = (
 def mandi():
     prices = []
     error = None
-    response = None
 
     state = request.args.get("state", "").strip()
     district = request.args.get("district", "").strip()
@@ -1116,34 +1117,85 @@ def mandi():
     market = request.args.get("market", "").strip()
 
     if not DATA_GOV_API_KEY:
-        error = "API Key nahi mili. Apni .env file check karein."
+        error = "Mandi API key nahi mili. Configuration check karein."
 
     else:
-        params = {
-            "api-key": DATA_GOV_API_KEY,
-            "format": "json",
-            "limit": 100
-        }
+        data = None
+
+        command = [
+            "curl.exe",
+            "-sS",
+            "-L",
+            "--max-time", "30",
+            "-G",
+            MANDI_API_URL,
+            "--data-urlencode", f"api-key={DATA_GOV_API_KEY}",
+            "--data-urlencode", "format=json",
+            "--data-urlencode", "offset=0",
+            "--data-urlencode", "limit=100",
+        ]
 
         if state:
-            params["filters[state]"] = state
+            command.extend([
+                "--data-urlencode", f"filters[state]={state}"
+            ])
+
         if district:
-            params["filters[district]"] = district
+            command.extend([
+                "--data-urlencode", f"filters[district]={district}"
+            ])
+
         if commodity:
-            params["filters[commodity]"] = commodity
+            command.extend([
+                "--data-urlencode", f"filters[commodity]={commodity}"
+            ])
+
         if market:
-            params["filters[market]"] = market
+            command.extend([
+                "--data-urlencode", f"filters[market]={market}"
+            ])
 
-        try:
-            response = requests.get(
-                MANDI_API_URL,
-                params=params,
-                timeout=20
-            )
+        for attempt in range(3):
+            try:
+                response = subprocess.run(
+                    command,
+                    capture_output=True,
+                    text=True,
+                    timeout=35
+                )
 
-            response.raise_for_status()
-            data = response.json()
+                if response.returncode != 0:
+                    raise RuntimeError("curl request failed")
 
+                data = json.loads(response.stdout)
+
+                if data.get("error"):
+                    raise RuntimeError(data["error"])
+
+                break
+
+            except (
+                subprocess.SubprocessError,
+                json.JSONDecodeError,
+                RuntimeError,
+            ) as e:
+                print(
+                    f"MANDI API ERROR (attempt {attempt + 1}/3):",
+                    type(e).__name__,
+                    str(e)
+                )
+
+                data = None
+
+                if attempt < 2:
+                    time.sleep(2 ** (attempt + 1))
+                else:
+                    error = (
+                        "Mandi prices abhi load nahi ho pa rahe hain. "
+                        "Kripya kuch der baad dobara try karein."
+                    )
+
+        if data is not None:
             for item in data.get("records", []):
                 prices.append({
                     "crop": item.get("commodity", "Unknown"),
@@ -1155,25 +1207,17 @@ def mandi():
                     "min_price": item.get("min_price", ""),
                     "max_price": item.get("max_price", ""),
                     "price": item.get("modal_price", ""),
-                    "unit": "per quintal",
+"price_per_kg": (
+    round(float(item["modal_price"]) / 100, 2)
+    if item.get("modal_price") not in ("", None)
+    else None
+),
+"unit": "per quintal",
                     "source": "data.gov.in / AGMARKNET"
                 })
 
-            if not prices:
-                error = "Is selection ke liye data nahi mila."
-
-        except requests.exceptions.RequestException as e:
-            print("MANDI API ERROR:", repr(e))
-
-            if response is not None:
-                print("STATUS CODE:", response.status_code)
-                print("API RESPONSE:", response.text[:1000])
-
-            error = "Unable to retrieve data from the Government API. Please check the VS Code terminal."
-
-        except ValueError as e:
-            print("MANDI JSON ERROR:", repr(e))
-            error = "API ka response JSON format mein nahi hai."
+            if not prices and not error:
+                error = "No mandi data found for this selection."
 
     return render_template(
         "mandi.html",
@@ -1185,45 +1229,11 @@ def mandi():
         market=market
     )
 
-# ---------------- kisan jogna ----------------------
+# ---------------- KISAN YOJANA ----------------
 
 @app.route("/yojana")
 def yojana():
     return render_template("yojana.html")
-
-# ---------------- FARMING CALCULATOR ----------------
-
-@app.route("/calculator", methods=["GET", "POST"])
-def calculator():
-    result = None
-    error = None
-
-    if request.method == "POST":
-        try:
-            area = float(request.form.get("area", ""))
-            seed_rate = float(request.form.get("seed_rate", ""))
-            cost_per_kg = float(request.form.get("cost_per_kg", "0"))
-
-            if area <= 0 or seed_rate < 0 or cost_per_kg < 0:
-                error = "Kripya valid positive values enter karein."
-
-            else:
-                seed_quantity = area * seed_rate
-                total_cost = seed_quantity * cost_per_kg
-
-                result = {
-                    "seed_quantity": round(seed_quantity, 2),
-                    "total_cost": round(total_cost, 2)
-                }
-
-        except (ValueError, TypeError):
-            error = "Kripya sabhi fields mein valid numbers enter karein."
-
-    return render_template(
-        "calculator.html",
-        result=result,
-        error=error
-    )
 # ================= CROP DISEASE SEED DATA =================
 
 def seed_crop_diseases():
