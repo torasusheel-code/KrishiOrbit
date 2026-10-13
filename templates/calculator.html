@@ -8,6 +8,92 @@
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='calculator.css') }}">
+
+    <style>
+        .form-field select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #d8e3d5;
+            border-radius: 10px;
+            background: #fff;
+            color: #263b2b;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-field select:focus,
+        .form-field input:focus {
+            border-color: #39834a;
+            box-shadow: 0 0 0 3px rgba(57, 131, 74, 0.12);
+        }
+
+        .result-card.area-result {
+            border-top: 4px solid #d4a72c;
+        }
+
+        .message {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .error-message {
+            background: #fff0ef;
+            color: #a52822;
+        }
+
+        .result-note {
+            margin-top: 15px;
+            padding: 13px;
+            border-radius: 10px;
+            background: #f0f8ed;
+            color: #315d35;
+            line-height: 1.6;
+        }
+
+        .field-help {
+            display: block;
+            margin-top: 7px;
+            line-height: 1.5;
+        }
+
+        /* Fix double borders in calculator inputs */
+.calculator-form .input-wrap {
+    border: 1px solid #d8e3d5;
+    border-radius: 10px;
+    background: #fff;
+    padding: 0;
+    overflow: hidden;
+}
+
+.calculator-form .input-wrap input,
+.calculator-form .input-wrap select {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background: transparent;
+    border-radius: 0;
+}
+
+.calculator-form .input-wrap:focus-within {
+    border-color: #39834a;
+    box-shadow: 0 0 0 2px rgba(57, 131, 74, 0.12);
+}
+
+.calculator-form .input-wrap .input-icon {
+    flex-shrink: 0;
+}
+
+        @media (max-width: 600px) {
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -31,13 +117,13 @@
         <h1>Farming Calculator</h1>
 
         <p>
-            Estimate your seed requirement and calculate
-            the expected seed cost for your farm.
+            Calculate your land area, seed requirement,
+            and estimated seed cost with ease.
         </p>
 
         <div class="hero-tags">
+            <span>✓ Multiple Land Units</span>
             <span>✓ Quick Estimate</span>
-            <span>✓ Simple Calculation</span>
             <span>✓ Farmer Friendly</span>
         </div>
     </div>
@@ -58,9 +144,10 @@
         <div>
             <span class="section-kicker">PLAN WITH CONFIDENCE</span>
             <h2>Calculate Your Seed Budget</h2>
+
             <p>
-                Enter your farm area, seed rate, and seed price
-                to get an estimate.
+                Select your land measurement unit and enter
+                your seed rate and seed price.
             </p>
         </div>
 
@@ -82,10 +169,9 @@
 
             <form method="POST" class="calculator-form">
 
+                <!-- Farm Area -->
                 <div class="form-field">
-                    <label for="area">
-                        Farm Area <span>(hectares)</span>
-                    </label>
+                    <label for="area">Farm Area</label>
 
                     <div class="input-wrap">
                         <span class="input-icon">📐</span>
@@ -94,7 +180,7 @@
                             type="number"
                             id="area"
                             name="area"
-                            min="0.01"
+                            min="0.0001"
                             step="any"
                             placeholder="Example: 2"
                             value="{{ request.form.get('area', '') }}"
@@ -102,11 +188,115 @@
                         >
                     </div>
 
-                    <small>
+                    <small class="field-help">
                         Enter the total area you plan to cultivate.
                     </small>
                 </div>
 
+                <!-- Land Measurement Unit -->
+                <div class="form-field">
+                    <label for="unit">Land Measurement Unit</label>
+
+                    <div class="input-wrap">
+                        <select id="unit" name="unit" required>
+                            <option value="hectare"
+                                {% if request.form.get('unit', 'hectare') == 'hectare' %}selected{% endif %}>
+                                Hectare
+                            </option>
+
+                            <option value="acre"
+                                {% if request.form.get('unit') == 'acre' %}selected{% endif %}>
+                                Acre
+                            </option>
+
+                            <option value="kanal"
+                                {% if request.form.get('unit') == 'kanal' %}selected{% endif %}>
+                                Kanal
+                            </option>
+
+                            <option value="marla"
+                                {% if request.form.get('unit') == 'marla' %}selected{% endif %}>
+                                Marla
+                            </option>
+
+                            <option value="bigha"
+                                {% if request.form.get('unit') == 'bigha' %}selected{% endif %}>
+                                Bigha
+                            </option>
+
+                            <option value="square_meter"
+                                {% if request.form.get('unit') == 'square_meter' %}selected{% endif %}>
+                                Square Meter
+                            </option>
+
+                            <option value="square_feet"
+                                {% if request.form.get('unit') == 'square_feet' %}selected{% endif %}>
+                                Square Feet
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- State Selection -->
+                <div class="form-field">
+                    <label for="state">State / Region</label>
+
+                    <div class="input-wrap">
+                        <select id="state" name="state">
+                            <option value="">Select State / Region</option>
+
+                            {% set states = [
+                                ('andhra_pradesh', 'Andhra Pradesh'),
+                                ('arunachal_pradesh', 'Arunachal Pradesh'),
+                                ('assam', 'Assam'),
+                                ('bihar', 'Bihar'),
+                                ('chhattisgarh', 'Chhattisgarh'),
+                                ('goa', 'Goa'),
+                                ('gujarat', 'Gujarat'),
+                                ('haryana', 'Haryana'),
+                                ('himachal_pradesh', 'Himachal Pradesh'),
+                                ('jharkhand', 'Jharkhand'),
+                                ('karnataka', 'Karnataka'),
+                                ('kerala', 'Kerala'),
+                                ('madhya_pradesh', 'Madhya Pradesh'),
+                                ('maharashtra', 'Maharashtra'),
+                                ('manipur', 'Manipur'),
+                                ('meghalaya', 'Meghalaya'),
+                                ('mizoram', 'Mizoram'),
+                                ('nagaland', 'Nagaland'),
+                                ('odisha', 'Odisha'),
+                                ('punjab', 'Punjab'),
+                                ('rajasthan', 'Rajasthan'),
+                                ('sikkim', 'Sikkim'),
+                                ('tamil_nadu', 'Tamil Nadu'),
+                                ('telangana', 'Telangana'),
+                                ('tripura', 'Tripura'),
+                                ('uttar_pradesh', 'Uttar Pradesh'),
+                                ('uttarakhand', 'Uttarakhand'),
+                                ('west_bengal', 'West Bengal'),
+                                ('delhi', 'Delhi'),
+                                ('jammu_kashmir', 'Jammu and Kashmir'),
+                                ('ladakh', 'Ladakh'),
+                                ('puducherry', 'Puducherry'),
+                                ('chandigarh', 'Chandigarh')
+                            ] %}
+
+                            {% for value, label in states %}
+                                <option value="{{ value }}"
+                                    {% if request.form.get('state') == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <small class="field-help">
+                        Select your region when using local units such as Bigha.
+                        Conversion depends on the local land measurement standard.
+                    </small>
+                </div>
+
+                <!-- Seed Rate -->
                 <div class="form-field">
                     <label for="seed_rate">
                         Seed Rate <span>(kg/hectare)</span>
@@ -127,11 +317,12 @@
                         >
                     </div>
 
-                    <small>
-                        Use the recommended rate for your crop.
+                    <small class="field-help">
+                        Enter the recommended seed rate for your crop.
                     </small>
                 </div>
 
+                <!-- Seed Price -->
                 <div class="form-field">
                     <label for="cost_per_kg">
                         Seed Price <span>(₹ per kg)</span>
@@ -152,7 +343,7 @@
                         >
                     </div>
 
-                    <small>
+                    <small class="field-help">
                         Enter the price of one kilogram of seed.
                     </small>
                 </div>
@@ -165,6 +356,7 @@
             </form>
         </section>
 
+        <!-- Information Card -->
         <aside class="side-card">
 
             <div class="side-icon">🌿</div>
@@ -172,13 +364,18 @@
             <h3>How It Works</h3>
 
             <p>
-                Enter three values to estimate the seed quantity
-                and its approximate cost.
+                Enter your land area, choose a unit, and provide
+                your seed rate and price.
             </p>
 
             <div class="formula-box">
+                <span>Area Conversion</span>
+                <strong>Selected Unit → Hectares</strong>
+            </div>
+
+            <div class="formula-box">
                 <span>Seed Quantity</span>
-                <strong>Farm Area × Seed Rate</strong>
+                <strong>Area in Hectares × Seed Rate</strong>
             </div>
 
             <div class="formula-box">
@@ -191,8 +388,8 @@
 
                 <p>
                     Seed rates vary by crop, variety, spacing,
-                    and local farming conditions. Check the
-                    recommended rate for your crop.
+                    and local farming conditions. Always check
+                    the recommended rate for your crop.
                 </p>
             </div>
 
@@ -200,6 +397,7 @@
 
     </div>
 
+    <!-- Error Message -->
     {% if error %}
     <div class="message error-message">
         <span>⚠️</span>
@@ -207,6 +405,7 @@
     </div>
     {% endif %}
 
+    <!-- Calculation Results -->
     {% if result %}
 
     <section class="result-section">
@@ -224,6 +423,26 @@
 
         <div class="result-grid">
 
+            <!-- Converted Area -->
+            <div class="result-card area-result">
+                <div class="result-card-top">
+                    <span class="result-icon">📏</span>
+                    <span class="result-label">
+                        Area in Hectares
+                    </span>
+                </div>
+
+                <div class="result-value">
+                    {{ result.area_in_hectares }}
+                    <span>ha</span>
+                </div>
+
+                <p>
+                    Converted area used for the seed calculation.
+                </p>
+            </div>
+
+            <!-- Seed Quantity -->
             <div class="result-card seed-result">
                 <div class="result-card-top">
                     <span class="result-icon">🌾</span>
@@ -241,6 +460,7 @@
                 </p>
             </div>
 
+            <!-- Seed Cost -->
             <div class="result-card cost-result">
                 <div class="result-card-top">
                     <span class="result-icon">💰</span>
@@ -260,10 +480,30 @@
 
         </div>
 
+        <div class="result-note">
+            <strong>📋 Your calculation summary</strong>
+            <p>
+                Entered area:
+                {{ result.area }} {{ result.unit | replace('_', ' ') | title }}
+            </p>
+            <p>
+                Converted area:
+                {{ result.area_in_hectares }} hectares
+            </p>
+            <p>
+                Estimated seed requirement:
+                {{ result.seed_quantity }} kg
+            </p>
+            <p>
+                Estimated seed cost:
+                ₹{{ result.total_cost }}
+            </p>
+        </div>
+
         <p class="result-disclaimer">
             This is an estimate based on your inputs.
-            Actual seed requirements and costs may vary
-            by crop and local conditions.
+            Local land-unit definitions, crop seed rates,
+            and actual prices may vary.
         </p>
 
     </section>

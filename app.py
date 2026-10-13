@@ -22,6 +22,8 @@ DATA_GOV_API_KEY = os.getenv("DATA_GOV_API_KEY")
 # ---------------- DATABASE ----------------
 
 def get_db():
+    print("GET_DB DATABASE PATH:", os.path.abspath(DATABASE))
+
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
@@ -141,6 +143,7 @@ def get_sowing_recommendation(crop, state, district):
 # ---------------- DATABASE INITIALIZATION ----------------
 def init_db():
     conn = sqlite3.connect(DATABASE)
+    print("INIT_DB DATABASE PATH:", os.path.abspath(DATABASE))
     cursor = conn.cursor()
 
     try:
@@ -1330,6 +1333,83 @@ def mandi():
 @app.route("/yojana")
 def yojana():
     return render_template("yojana.html")
+
+# ---------------- FARMING CALCULATOR ----------------
+
+@app.route("/calculator", methods=["GET", "POST"])
+def calculator():
+    result = None
+    error = None
+
+    # Conversion factors: 1 unit = hectares
+    unit_to_hectare = {
+        "hectare": 1.0,
+        "acre": 0.4046856422,
+        "square_meter": 0.0001,
+        "square_feet": 0.000009290304,
+        "kanal": 0.0505857,
+        "marla": 0.00252929,
+    }
+
+    # Approximate regional bigha conversions.
+    # These are examples only; local definitions may differ.
+    bigha_to_hectare = {
+        "uttar_pradesh": 0.25,
+        "bihar": 0.25,
+        "rajasthan": 0.16,
+        "assam": 0.1338,
+        "west_bengal": 0.1338,
+    }
+
+    if request.method == "POST":
+        try:
+            area = float(request.form.get("area", 0))
+            unit = request.form.get("unit", "hectare")
+            state = request.form.get("state", "").lower()
+            seed_rate = float(request.form.get("seed_rate", 0))
+            cost_per_kg = float(request.form.get("cost_per_kg", 0))
+
+            if area <= 0:
+                error = "Farm area must be greater than zero."
+
+            elif seed_rate < 0 or cost_per_kg < 0:
+                error = "Seed rate and seed price cannot be negative."
+
+            elif unit == "bigha" and state not in bigha_to_hectare:
+                error = (
+                    "Please select a supported state for Bigha conversion, "
+                    "or choose Acre or Hectare."
+                )
+
+            elif unit not in unit_to_hectare and unit != "bigha":
+                error = "Please select a valid land unit."
+
+            else:
+                if unit == "bigha":
+                    conversion_factor = bigha_to_hectare[state]
+                else:
+                    conversion_factor = unit_to_hectare[unit]
+
+                area_in_hectares = area * conversion_factor
+                seed_quantity = area_in_hectares * seed_rate
+                total_cost = seed_quantity * cost_per_kg
+
+                result = {
+                    "area_in_hectares": round(area_in_hectares, 4),
+                    "seed_quantity": round(seed_quantity, 2),
+                    "total_cost": round(total_cost, 2),
+                    "unit": unit,
+                    "area": area,
+                }
+
+        except (ValueError, TypeError):
+            error = "Please enter valid numeric values."
+
+    return render_template(
+        "calculator.html",
+        result=result,
+        error=error
+    )
 # ================= CROP DISEASE SEED DATA =================
 
 
@@ -1833,45 +1913,45 @@ def update_jammu_sowing_calendar():
         conn.close()
 # ---------------- START APPLICATION ----------------
 
-if __name__ == "__main__":
-
+def initialize_application():
     with app.app_context():
+        print("Starting database initialization...")
+
         init_db()
+        print("init_db() completed.")
 
         seed_sowing_calendar()
-        # Insert initial crop disease records
+        print("Sowing calendar initialization completed.")
+
         seed_crop_diseases()
+        print("Crop disease seeding completed.")
 
         update_rajouri_sowing_data()
-
         update_jammu_sowing_calendar()
 
-        # Check sowing calendar records
+        # Verify that the table exists in the database
         conn = get_db()
 
-        rows = conn.execute("""
-            SELECT crop_name, state, district,
-                   sowing_start, sowing_end,
-                   verified, recommended_period
-            FROM sowing_calendar
-        """).fetchall()
+        try:
+            tables = conn.execute("""
+                SELECT name
+                FROM sqlite_master
+                WHERE type = 'table'
+                  AND name = 'crop_diseases'
+            """).fetchone()
 
-        print("\n--- SOWING CALENDAR RECORDS ---")
+            if tables:
+                print("SUCCESS: crop_diseases table exists.")
+            else:
+                print("ERROR: crop_diseases table was not created.")
 
-        for row in rows:
-            print(dict(row))
+        finally:
+            conn.close()
 
-        # Check crop disease records
-        disease_rows = conn.execute("""
-            SELECT crop_name, disease_name, verified, source
-            FROM crop_diseases
-        """).fetchall()
+        print("Application database initialization completed.")
+        
+initialize_application()
 
-        print("\n--- CROP DISEASE RECORDS ---")
 
-        for row in disease_rows:
-            print(dict(row))
-
-        conn.close()
-
+if __name__ == "__main__":
     app.run(debug=True)
