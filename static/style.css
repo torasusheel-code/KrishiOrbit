@@ -1751,3 +1751,17 @@ a {
     margin: 8px 0;
     min-height: 18px;
 }
+.price-per-kg {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #e8f7ed;
+    color: #087443;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.price-per-kg span {
+    font-size: 13px;
+    font-weight: 500;
+}
