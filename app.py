@@ -12,6 +12,9 @@ load_dotenv()
 
 
 app = Flask(__name__)
+# Weather cache
+WEATHER_CACHE = {}
+WEATHER_CACHE_SECONDS = 1800  # 30 minutes
 
 DATABASE = os.path.join(app.root_path, "KrishiOrbit.db")
 
@@ -416,7 +419,10 @@ def disease_advisory():
 # ---------------- WEATHER ----------------
 
 from datetime import datetime
+import time
 
+WEATHER_CACHE = {}
+WEATHER_CACHE_SECONDS = 1800  # 30 minutes
 @app.route("/weather", methods=["GET", "POST"])
 def weather():
 
@@ -468,49 +474,66 @@ def weather():
         country = location.get("country", "")
 
         # ----------------------------------
-        # STEP 2: Get Weather Data
+               
+        # STEP 2: Get Weather Data with Cache
         # ----------------------------------
-        weather_url = "https://api.open-meteo.com/v1/forecast"
 
-        weather_response = requests.get(
-            weather_url,
-            params={
-                "latitude": latitude,
-                "longitude": longitude,
-                "current": [
-                    "temperature_2m",
-                    "relative_humidity_2m",
-                    "apparent_temperature",
-                    "precipitation",
-                    "wind_speed_10m",
-                    "weather_code"
-                ],
-                "hourly": [
-                    "temperature_2m",
-                    "precipitation_probability",
-                    "precipitation",
-                    "relative_humidity_2m",
-                    "wind_speed_10m",
-                    "weather_code"
-                ],
-                "daily": [
-                    "temperature_2m_max",
-                    "temperature_2m_min",
-                    "precipitation_probability_max",
-                    "precipitation_sum",
-                    "weather_code",
-                    "sunrise",
-                    "sunset"
-                ],
-                "forecast_days": 7,
-                "timezone": "auto"
-            },
-            timeout=20
-        )
+        cache_key = f"{latitude},{longitude}"
+        cached_weather = WEATHER_CACHE.get(cache_key)
 
-        weather_response.raise_for_status()
-        data = weather_response.json()
+        if (
+            cached_weather
+            and time.time() - cached_weather["saved_at"]
+            < WEATHER_CACHE_SECONDS
+        ):
+            data = cached_weather["data"]
 
+        else:
+            weather_url = "https://api.open-meteo.com/v1/forecast"
+
+            weather_response = requests.get(
+                weather_url,
+                params={
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "current": [
+                        "temperature_2m",
+                        "relative_humidity_2m",
+                        "apparent_temperature",
+                        "precipitation",
+                        "wind_speed_10m",
+                        "weather_code"
+                    ],
+                    "hourly": [
+                        "temperature_2m",
+                        "precipitation_probability",
+                        "precipitation",
+                        "relative_humidity_2m",
+                        "wind_speed_10m",
+                        "weather_code"
+                    ],
+                    "daily": [
+                        "temperature_2m_max",
+                        "temperature_2m_min",
+                        "precipitation_probability_max",
+                        "precipitation_sum",
+                        "weather_code",
+                        "sunrise",
+                        "sunset"
+                    ],
+                    "forecast_days": 7,
+                    "timezone": "auto"
+                },
+                timeout=20
+            )
+
+            weather_response.raise_for_status()
+            data = weather_response.json()
+
+            WEATHER_CACHE[cache_key] = {
+                "data": data,
+                "saved_at": time.time()
+            }
         # ----------------------------------
         # STEP 3: Current Weather
         # ----------------------------------
