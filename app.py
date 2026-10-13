@@ -1120,54 +1120,37 @@ def mandi():
         error = "Mandi API key nahi mili. Configuration check karein."
 
     else:
-        data = None
-
-        command = [
-            "curl",
-            "-sS",
-            "-L",
-            "--max-time", "30",
-            "-G",
-            MANDI_API_URL,
-            "--data-urlencode", f"api-key={DATA_GOV_API_KEY}",
-            "--data-urlencode", "format=json",
-            "--data-urlencode", "offset=0",
-            "--data-urlencode", "limit=100",
-        ]
+        params = {
+            "api-key": DATA_GOV_API_KEY,
+            "format": "json",
+            "offset": 0,
+            "limit": 100,
+        }
 
         if state:
-            command.extend([
-                "--data-urlencode", f"filters[state]={state}"
-            ])
+            params["filters[state]"] = state
 
         if district:
-            command.extend([
-                "--data-urlencode", f"filters[district]={district}"
-            ])
+            params["filters[district]"] = district
 
         if commodity:
-            command.extend([
-                "--data-urlencode", f"filters[commodity]={commodity}"
-            ])
+            params["filters[commodity]"] = commodity
 
         if market:
-            command.extend([
-                "--data-urlencode", f"filters[market]={market}"
-            ])
+            params["filters[market]"] = market
+
+        data = None
 
         for attempt in range(3):
             try:
-                response = subprocess.run(
-                    command,
-                    capture_output=True,
-                    text=True,
-                    timeout=35
+                response = requests.get(
+                    MANDI_API_URL,
+                    params=params,
+                    timeout=(10, 30),
                 )
 
-                if response.returncode != 0:
-                    raise RuntimeError("curl request failed")
-
-                data = json.loads(response.stdout)
+                response.raise_for_status()
+                data = response.json()
 
                 if data.get("error"):
                     raise RuntimeError(data["error"])
@@ -1175,14 +1158,14 @@ def mandi():
                 break
 
             except (
-                subprocess.SubprocessError,
-                json.JSONDecodeError,
+                requests.exceptions.RequestException,
+                ValueError,
                 RuntimeError,
             ) as e:
                 print(
                     f"MANDI API ERROR (attempt {attempt + 1}/3):",
                     type(e).__name__,
-                    str(e)
+                    str(e),
                 )
 
                 data = None
@@ -1197,6 +1180,17 @@ def mandi():
 
         if data is not None:
             for item in data.get("records", []):
+                modal_price = item.get("modal_price")
+
+                try:
+                    price_per_kg = (
+                        round(float(modal_price) / 100, 2)
+                        if modal_price not in ("", None)
+                        else None
+                    )
+                except (ValueError, TypeError):
+                    price_per_kg = None
+
                 prices.append({
                     "crop": item.get("commodity", "Unknown"),
                     "state": item.get("state", ""),
@@ -1206,18 +1200,14 @@ def mandi():
                     "arrival_date": item.get("arrival_date", ""),
                     "min_price": item.get("min_price", ""),
                     "max_price": item.get("max_price", ""),
-                    "price": item.get("modal_price", ""),
-"price_per_kg": (
-    round(float(item["modal_price"]) / 100, 2)
-    if item.get("modal_price") not in ("", None)
-    else None
-),
-"unit": "per quintal",
-                    "source": "data.gov.in / AGMARKNET"
+                    "price": modal_price if modal_price is not None else "",
+                    "price_per_kg": price_per_kg,
+                    "unit": "per quintal",
+                    "source": "data.gov.in / AGMARKNET",
                 })
 
             if not prices and not error:
-                error = "No mandi data found for this selection."
+                error = "Is selection ke liye mandi data nahi mila."
 
     return render_template(
         "mandi.html",
@@ -1226,9 +1216,8 @@ def mandi():
         state=state,
         district=district,
         commodity=commodity,
-        market=market
+        market=market,
     )
-
 # ---------------- KISAN YOJANA ----------------
 
 @app.route("/yojana")
