@@ -49,6 +49,51 @@ WEATHER_CACHE = {}
 WEATHER_CACHE_SECONDS = 1800
 
 DATA_GOV_API_KEY = os.getenv("DATA_GOV_API_KEY")
+
+# ---------------- CROP INFORMATION API ----------------
+
+@app.route("/api/crop-info/<crop_name>")
+def crop_info_api(crop_name):
+    conn = get_db()
+
+    try:
+        crop = conn.execute(
+            """
+            SELECT id, name, season, duration, description
+            FROM crops
+            WHERE LOWER(name) = LOWER(?)
+            """,
+            (crop_name.strip(),)
+        ).fetchone()
+
+        if crop is None:
+            return {
+                "success": False,
+                "message": "Crop not found."
+            }, 404
+
+        return {
+            "success": True,
+            "source": "SQLite",
+            "crop": {
+                "id": crop["id"],
+                "name": crop["name"],
+                "season": crop["season"],
+                "duration": crop["duration"],
+                "description": crop["description"]
+            }
+        }
+
+    except sqlite3.Error:
+        app.logger.exception("Crop information database error")
+
+        return {
+            "success": False,
+            "message": "Unable to fetch crop information."
+        }, 500
+
+    finally:
+        conn.close()
 # ---------------- DATABASE ----------------
 
 def get_db():
@@ -426,6 +471,7 @@ def crops_page():
         "crops.html",
         crops=crops
     )
+
 
 # ================= CROP DISEASE ADVISORY =================
 
