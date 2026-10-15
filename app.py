@@ -482,7 +482,38 @@ def fetch_crop_production_data(params):
         raise ValueError(
             "Invalid JSON from crop production API."
         ) from exc
+@app.route("/api/crop-production/connection-test")
+def crop_production_connection_test():
+    try:
+        response = requests.get(
+            "https://api.data.gov.in/resource/"
+            + CROP_PRODUCTION_RESOURCE_ID,
+            params={
+                "api-key": CROP_PRODUCTION_API_KEY,
+                "format": "json",
+                "limit": 1
+            },
+            timeout=(10, 15)
+        )
 
+        return jsonify({
+            "success": response.ok,
+            "http_status": response.status_code,
+            "message": (
+                "Government API responded."
+                if response.ok
+                else "Government API returned an HTTP error."
+            )
+        }), 200
+
+    except requests.RequestException as exc:
+        app.logger.exception("Government API connection test failed.")
+
+        return jsonify({
+            "success": False,
+            "error_type": type(exc).__name__,
+            "message": "Could not connect to Government API."
+        }), 502
 # -------- CROP PRODUCTION CSV DOWNLOAD --------
 
 @app.route("/api/crop-production/download/csv")
