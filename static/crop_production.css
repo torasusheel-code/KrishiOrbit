@@ -1,0 +1,686 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --green: #176b3a;
+    --green-dark: #104c2b;
+    --green-light: #e9f7ed;
+    --text: #21352a;
+    --muted: #68796e;
+    --border: #dce8de;
+    --surface: #ffffff;
+    --background: #f4f8f4;
+    --shadow: 0 10px 30px rgba(25, 75, 42, 0.08);
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text);
+    background: var(--background);
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 18px 7%;
+    background: var(--surface);
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+}
+
+.logo,
+.footer-brand {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--green);
+}
+
+.nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.nav-links a {
+    color: #405449;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--green);
+}
+
+.hero {
+    min-height: 290px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    padding: 50px 8%;
+    overflow: hidden;
+    color: white;
+    background: linear-gradient(120deg, #104c2b, #21834a);
+}
+
+.hero-content {
+    max-width: 750px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 7px 13px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.hero h1 {
+    margin: 18px 0 10px;
+    font-size: clamp(30px, 4vw, 46px);
+    line-height: 1.2;
+}
+
+.hero p {
+    max-width: 650px;
+    color: #e0f3e5;
+}
+
+.hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.hero-tags span {
+    padding: 7px 12px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.13);
+    font-size: 13px;
+}
+
+.hero-icon {
+    font-size: 110px;
+    opacity: 0.9;
+}
+
+.container {
+    width: min(1200px, 90%);
+    margin: 42px auto;
+}
+
+.section-heading,
+.results-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.kicker {
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.section-heading h2,
+.results-heading h2 {
+    margin: 5px 0;
+    font-size: 27px;
+}
+
+.section-heading p,
+.panel-heading p {
+    margin: 0;
+    color: var(--muted);
+}
+
+.heading-icon {
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: var(--green-light);
+    font-size: 29px;
+}
+
+.search-panel,
+.results-section {
+    padding: 28px;
+    margin-bottom: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+}
+
+.panel-heading {
+    margin-bottom: 22px;
+}
+
+.panel-heading h2 {
+    margin: 0 0 4px;
+    font-size: 21px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 13px;
+    color: var(--text);
+    background: white;
+    border: 1px solid #cfddd1;
+    border-radius: 10px;
+    font: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: 2px solid #8ac49b;
+    border-color: var(--green);
+}
+
+.button-group {
+    display: flex;
+    align-items: end;
+    gap: 10px;
+}
+
+.search-btn,
+.clear-btn,
+.pagination button {
+    min-height: 44px;
+    padding: 11px 18px;
+    border: 0;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.search-btn {
+    color: white;
+    background: var(--green);
+}
+
+.search-btn:hover {
+    background: var(--green-dark);
+}
+
+.clear-btn {
+    color: var(--green);
+    background: var(--green-light);
+}
+
+.help-text {
+    margin: 22px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 22px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+.stat-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    background: var(--green-light);
+    font-size: 24px;
+}
+
+.stat-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.stat-card h3 {
+    margin: 5px 0 0;
+    color: var(--green);
+    font-size: 25px;
+}
+
+.results-heading {
+    margin-bottom: 20px;
+}
+
+.source-badge {
+    padding: 8px 13px;
+    border-radius: 30px;
+    color: var(--green);
+    background: var(--green-light);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.status-message {
+    padding: 13px 16px;
+    margin-bottom: 18px;
+    border-radius: 10px;
+    color: #235c36;
+    background: #edf8ef;
+    font-size: 14px;
+}
+
+.status-message.error {
+    color: #9b2424;
+    background: #fff0f0;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+thead {
+    color: white;
+    background: var(--green);
+}
+
+th,
+td {
+    padding: 15px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+tbody tr:nth-child(even) {
+    background: #f7fbf7;
+}
+
+tbody tr:hover {
+    background: #edf8ef;
+}
+
+tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.pagination button {
+    color: white;
+    background: var(--green);
+}
+
+.pagination button:disabled {
+    color: #859187;
+    background: #e7ece8;
+    cursor: not-allowed;
+}
+
+#pageInfo {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.data-note {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.footer {
+    padding: 35px 20px;
+    text-align: center;
+    background: #e8f2e9;
+}
+
+.footer p {
+    color: var(--muted);
+}
+
+.footer small {
+    color: #637369;
+}
+
+@media (max-width: 850px) {
+    .navbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .nav-links {
+        gap: 13px;
+    }
+
+    .hero {
+        padding: 40px 6%;
+    }
+
+    .hero-icon {
+        font-size: 75px;
+    }
+
+    .filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .navbar {
+        padding: 17px 5%;
+    }
+
+    .nav-links {
+        gap: 10px 14px;
+    }
+
+    .nav-links a {
+        font-size: 13px;
+    }
+
+    .hero {
+        padding: 35px 6%;
+    }
+
+    .hero-icon {
+        display: none;
+    }
+
+    .container {
+        width: 92%;
+        margin: 28px auto;
+    }
+
+    .section-heading h2,
+    .results-heading h2 {
+        font-size: 22px;
+    }
+
+    .search-panel,
+    .results-section {
+        padding: 18px;
+        border-radius: 15px;
+    }
+
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .button-group {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .button-group button {
+        width: 100%;
+    }
+
+    .pagination {
+        gap: 10px;
+    }
+
+    .pagination button {
+        padding: 10px 12px;
+    }
+}
+/* -------- CROP PRODUCTION CHARTS -------- */
+
+.charts-section {
+    margin-bottom: 28px;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.chart-card {
+    min-width: 0;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+}
+
+.chart-card h3 {
+    margin: 0 0 20px;
+    color: var(--text);
+    font-size: 18px;
+}
+
+.chart-card canvas {
+    width: 100% !important;
+    max-height: 360px;
+}
+
+@media (max-width: 700px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-card {
+        padding: 16px;
+    }
+}
+/* ========================================
+   PRODUCTION SUMMARY DASHBOARD
+======================================== */
+
+.summary-section {
+    margin-bottom: 28px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.summary-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 18px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-width: 0;
+}
+
+.summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(22, 101, 52, 0.10);
+}
+
+.summary-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+}
+
+.summary-card h3 {
+    font-size: 14px;
+    color: var(--text);
+    margin: 0 0 12px;
+}
+
+.summary-card p {
+    font-size: 22px;
+    font-weight: 700;
+    color: #15803d;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+    .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-card {
+        padding: 18px;
+    }
+}
+/* India Crop Production Map */
+.india-map-section {
+    margin: 30px 0;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.map-heading {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.map-heading h2 {
+    color: #176b3a;
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.map-heading p {
+    color: #666;
+    font-size: 15px;
+}
+
+.india-map-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+    gap: 22px;
+    align-items: stretch;
+}
+
+#indiaCropMap {
+    width: 100%;
+    height: 500px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #f0f8f0;
+    border: 1px solid #dce9dc;
+}
+
+.map-info-card {
+    padding: 22px;
+    background: #f4faf3;
+    border: 1px solid #d9ead7;
+    border-radius: 14px;
+}
+
+.map-info-card h3 {
+    color: #176b3a;
+    font-size: 23px;
+    margin-bottom: 20px;
+}
+
+.map-info-card p {
+    color: #444;
+    line-height: 1.7;
+    margin-bottom: 14px;
+}
+
+#mapProduction,
+#mapArea {
+    color: #176b3a;
+    font-weight: 700;
+}
+
+#mapMessage {
+    margin-top: 20px;
+    padding: 12px;
+    background: #e5f3e3;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+    .india-map-layout {
+        grid-template-columns: 1fr;
+    }
+
+    #indiaCropMap {
+        height: 350px;
+    }
+
+    .india-map-section {
+        padding: 15px;
+    }
+
+    .map-heading h2 {
+        font-size: 23px;
+    }
+}

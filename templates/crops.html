@@ -971,6 +971,44 @@ if (highestRain !== null && highestRain >= 70) {
         }
     }
 );
+
+// ================= CROP SEARCH AND FILTER =================
+
+function filterCrops() {
+    const searchTerm = cropSearch.value.trim().toLowerCase();
+    const selectedSeason = seasonFilter.value.trim().toLowerCase();
+
+    let visibleCount = 0;
+
+    cropCards.forEach(function(card) {
+        const cropName = card.dataset.cropName || "";
+        const cropSeason = card.dataset.cropSeason || "";
+
+        const matchesName = cropName.includes(searchTerm);
+        const matchesSeason =
+            !selectedSeason || cropSeason.includes(selectedSeason);
+
+        const visible = matchesName && matchesSeason;
+
+        card.hidden = !visible;
+
+        if (visible) {
+            visibleCount++;
+        }
+    });
+
+    cropCount.textContent = `${visibleCount} crops found`;
+    noCropsFound.hidden = visibleCount !== 0;
+}
+
+cropSearch.addEventListener("input", filterCrops);
+seasonFilter.addEventListener("change", filterCrops);
+
+clearCropFilters.addEventListener("click", function() {
+    cropSearch.value = "";
+    seasonFilter.value = "";
+    filterCrops();
+});
 // ================= INITIAL DISPLAY =================
 
 filterCrops();

@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Crop Production | KrishiOrbit</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='crop_production.css') }}">
+
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+
+
+<body>
+
+<nav class="navbar">
+    <a href="/" class="logo">🌾 KrishiOrbit</a>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/crops">Crop Guide</a>
+        <a href="/weather">Weather</a>
+        <a href="/mandi">Mandi Bhav</a>
+        <a href="/crop-production" class="active">Crop Production</a>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="hero-content">
+        <span class="badge">🌱 SMART FARMING TOOLS</span>
+
+        <h1>Crop Production Dashboard</h1>
+
+        <p>
+            Explore historical crop production records by state,
+            district, crop, season and year.
+        </p>
+
+        <div class="hero-tags">
+            <span>🌾 Crop Statistics</span>
+            <span>📍 State & District</span>
+            <span>📊 Production Records</span>
+        </div>
+    </div>
+
+    <div class="hero-icon">🌾</div>
+</header>
+
+<main class="container">
+
+    <section class="section-heading">
+        <div>
+            <span class="kicker">AGRICULTURAL STATISTICS</span>
+            <h2>Explore Crop Production</h2>
+            <p>Choose your filters and find matching records.</p>
+        </div>
+
+        <div class="heading-icon">📊</div>
+    </section>
+
+    <section class="search-panel">
+
+        <div class="panel-heading">
+            <h2>🔎 Filter Production Data</h2>
+            <p>All filters are optional.</p>
+        </div>
+
+        <form id="productionForm" class="filter-grid">
+
+            <div class="form-group">
+    <label for="state">📍 State</label>
+    <input
+        type="text"
+        id="state"
+        list="stateOptions"
+        placeholder="Select or type state"
+        autocomplete="off">
+
+    <datalist id="stateOptions">
+        <option value="Andaman and Nicobar Islands">
+        <option value="Andhra Pradesh">
+        <option value="Assam">
+        <option value="Bihar">
+        <option value="Chhattisgarh">
+        <option value="Gujarat">
+        <option value="Haryana">
+        <option value="Himachal Pradesh">
+        <option value="Jharkhand">
+        <option value="Karnataka">
+        <option value="Kerala">
+        <option value="Madhya Pradesh">
+        <option value="Maharashtra">
+        <option value="Odisha">
+        <option value="Punjab">
+        <option value="Rajasthan">
+        <option value="Sikkim">
+        <option value="Tamil Nadu">
+        <option value="Telangana">
+        <option value="Uttar Pradesh">
+        <option value="Uttarakhand">
+        <option value="West Bengal">
+    </datalist>
+</div>
+
+           <div class="form-group">
+    <label for="district">🏙️ District</label>
+
+    <input
+        type="text"
+        id="district"
+        list="districtOptions"
+        placeholder="Select state first"
+        autocomplete="off"
+        disabled>
+
+    <datalist id="districtOptions"></datalist>
+</div>
+
+            <div class="form-group">
+                <label for="crop">🌾 Crop</label>
+                <input
+                    type="text"
+                    id="crop"
+                    list="cropOptions"
+                    placeholder="e.g. Rice">
+
+                <datalist id="cropOptions">
+                    <option value="Rice">
+                    <option value="Wheat">
+                    <option value="Maize">
+                    <option value="Bajra">
+                    <option value="Mustard">
+                    <option value="Gram">
+                    <option value="Potato">
+                    <option value="Soybean">
+                </datalist>
+            </div>
+
+            <div class="form-group">
+                <label for="season">🌦️ Season</label>
+                <select id="season">
+                    <option value="">All Seasons</option>
+                    <option value="Kharif">Kharif</option>
+                    <option value="Rabi">Rabi</option>
+                    <option value="Whole Year">Whole Year</option>
+                    <option value="Summer">Summer</option>
+                    <option value="Autumn">Autumn</option>
+                    <option value="Winter">Winter</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="year">📅 Crop Year</label>
+                <input
+                    type="number"
+                    id="year"
+                    min="1997"
+                    max="2100"
+                    placeholder="e.g. 2020">
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="search-btn">
+                    🔍 Search Data
+                </button>
+
+                <button type="button" id="clearBtn" class="clear-btn">
+                    ✖ Clear
+                </button>
+            </div>
+
+        </form>
+
+        <p class="help-text">
+            💡 Tip: Combine filters to narrow down the records.
+        </p>
+
+    </section>
+
+    <!-- PRODUCTION SUMMARY DASHBOARD -->
+<section class="summary-section">
+
+    <div class="section-heading">
+        <span class="eyebrow">📊 PRODUCTION OVERVIEW</span>
+        <h2>Crop Production Summary</h2>
+        <p>Summary of the records matching your selected filters.</p>
+    </div>
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+            <div class="summary-icon">📋</div>
+            <h3>Matching Records</h3>
+            <p id="summaryRecords">—</p>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon">🌾</div>
+            <h3>Different Crops</h3>
+            <p id="summaryCrops">—</p>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon">🏆</div>
+            <h3>Top Producing Crop</h3>
+            <p id="summaryTopCrop">—</p>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon">🗺️</div>
+            <h3>Top Producing State</h3>
+            <p id="summaryTopState">—</p>
+        </div>
+        
+        <!-- Total Production Card -->
+    <div class="summary-card">
+       <div class="summary-icon">📈</div>
+       <h3>Total Production</h3>
+       <p id="summaryProduction">—</p>
+    </div>
+
+<!-- Total Cultivated Area Card -->
+    <div class="summary-card">
+      <div class="summary-icon">🌱</div>
+      <h3>Total Cultivated Area</h3>
+      <p id="summaryArea">—</p>
+    </div>
+ </div>
+
+</section>
+    <!-- CROP PRODUCTION CHARTS -->
+
+<section class="charts-section">
+    <div class="section-heading">
+        <div>
+            <span class="kicker">DATA VISUALIZATION</span>
+            <h2>Crop Production Analytics</h2>
+            <p>Explore production patterns from available government records.</p>
+        </div>
+    </div>
+
+    <div id="chartStatus" class="status-message">
+        Search for crop production data to view charts.
+    </div>
+
+    <div class="charts-grid">
+        <article class="chart-card">
+            <h3>🌾 Crop-wise Production</h3>
+            <canvas id="cropChart"></canvas>
+        </article>
+
+        <article class="chart-card">
+            <h3>🗺️ State-wise Comparison</h3>
+            <canvas id="stateChart"></canvas>
+        </article>
+
+        <article class="chart-card">
+            <h3>🌦️ Season-wise Production</h3>
+            <canvas id="seasonChart"></canvas>
+        </article>
+
+        <article class="chart-card">
+            <h3>📈 Year-wise Production</h3>
+            <canvas id="yearChart"></canvas>
+        </article>
+    </div>
+</section>
+
+<!-- India Crop Production Map -->
+<section class="india-map-section">
+    <div class="map-heading">
+        <h2>🇮🇳 India Crop Production Map</h2>
+        <p>
+            Explore state-wise crop production using the interactive map.
+        </p>
+    </div>
+
+    <div class="india-map-layout">
+        <div id="indiaCropMap"></div>
+
+        <div class="map-info-card">
+            <h3 id="mapStateName">Select a State</h3>
+            <p>
+                <strong>Crop Production:</strong>
+                <span id="mapProduction">--</span>
+            </p>
+            <p>
+                <strong>Cultivated Area:</strong>
+                <span id="mapArea">--</span>
+            </p>
+            <p id="mapMessage">
+                Click a state on the map to explore its data.
+            </p>
+        </div>
+    </div>
+</section>
+
+    <section class="stats-grid">
+
+        <article class="stat-card">
+            <span class="stat-icon">📚</span>
+            <div>
+                <p>Total Matching Records</p>
+                <h3 id="totalRecords">—</h3>
+            </div>
+        </article>
+
+        <article class="stat-card">
+            <span class="stat-icon">🌾</span>
+            <div>
+                <p>Records on This Page</p>
+                <h3 id="pageRecords">—</h3>
+            </div>
+        </article>
+
+        <article class="stat-card">
+            <span class="stat-icon">📅</span>
+            <div>
+                <p>Current Page</p>
+                <h3 id="currentPage">1</h3>
+            </div>
+        </article>
+
+    </section>
+
+    <section class="results-section">
+
+        <div class="results-heading">
+            <div>
+                <span class="kicker">OFFICIAL DATA</span>
+                <h2>Production Records</h2>
+            </div>
+
+            <span class="source-badge">data.gov.in</span>
+        </div>
+
+        <div id="statusMessage" class="status-message" role="status">
+            Loading crop production records...
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>State</th>
+                        <th>District</th>
+                        <th>Crop</th>
+                        <th>Season</th>
+                        <th>Area</th>
+                        <th>Production</th>
+                    </tr>
+                </thead>
+
+                <tbody id="productionTableBody">
+                    <tr>
+                        <td colspan="7">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <button id="prevBtn" type="button" disabled>
+                ← Previous
+            </button>
+
+            <span id="pageInfo">Page 1</span>
+
+            <button id="nextBtn" type="button" disabled>
+                Next →
+            </button>
+        </div>
+
+        <p class="data-note">
+            Note: Area and production units should be verified from the
+            official dataset documentation before interpreting the values.
+            Historical records may not represent current production.
+        </p>
+
+    </section>
+
+</main>
+
+<footer class="footer">
+    <a href="/" class="footer-brand">🌾 KrishiOrbit</a>
+    <p>Smart farming starts with informed decisions.</p>
+    <small>© 2026 KrishiOrbit. All rights reserved.</small>
+</footer>
+<script>
+    const form = document.getElementById("productionForm");
+    const tableBody = document.getElementById("productionTableBody");
+    const statusMessage = document.getElementById("statusMessage");
+
+    const totalRecords = document.getElementById("totalRecords");
+    const pageRecords = document.getElementById("pageRecords");
+    const currentPage = document.getElementById("currentPage");
+
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const pageInfo = document.getElementById("pageInfo");
+    const clearBtn = document.getElementById("clearBtn");
+
+    const stateInput = document.getElementById("state");
+    const districtInput = document.getElementById("district");
+    const districtOptions = document.getElementById("districtOptions");
+    const yearInput = document.getElementById("year");
+
+    const limit = 10;
+
+    let offset = 0;
+    let total = 0;
+    let loading = false;
+
+    let districtRequestId = 0;
+    let districtSearchTimer;
+
+    // ========================================
+    // CHART INSTANCES
+    // ========================================
+
+    let cropChartInstance = null;
+    let stateChartInstance = null;
+    let seasonChartInstance = null;
+    let yearChartInstance = null;
+
+   
+    // ========================================
+// DRAW BEAUTIFUL PRODUCTION CHARTS
+// ========================================
+
+function drawProductionChart(canvasId, chartType, items, instance) {
+    const canvas = document.getElementById(canvasId);
+
+    if (!canvas) {
+        return instance;
+    }
+
+    if (instance) {
+        instance.destroy();
+    }
+
+    const labels = items.map(item => item.label);
+    const values = items.map(item => Number(item.production) || 0);
+
+    // Different colors for different charts
+    const chartColors = {
+        cropChart: {
+            background: "rgba(34, 197, 94, 0.65)",
+            border: "#16a34a"
+        },
+        stateChart: {
+            background: "rgba(59, 130, 246, 0.65)",
+            border: "#2563eb"
+        },
+        seasonChart: {
+            background: "rgba(249, 115, 22, 0.65)",
+            border: "#ea580c"
+        },
+        yearChart: {
+            background: "rgba(139, 92, 246, 0.15)",
+            border: "#8b5cf6"
+        }
+    };
+
+    const colors = chartColors[canvasId] || {
+        background: "rgba(34, 197, 94, 0.65)",
+        border: "#16a34a"
+    };
+
+    const isLineChart = chartType === "line";
+
+    return new Chart(canvas, {
+        type: chartType,
+
+        data: {
+            labels: labels,
+
+            datasets: [{
+                label: "Production",
+
+                data: values,
+
+                backgroundColor: isLineChart
+                    ? colors.background
+                    : labels.map((_, index) => {
+                        const palette = [
+                            "#16a34a",
+                            "#2563eb",
+                            "#f97316",
+                            "#8b5cf6",
+                            "#0891b2",
+                            "#eab308",
+                            "#ec4899",
+                            "#64748b"
+                        ];
+
+                        return palette[index % palette.length] + "B3";
+                    }),
+
+                borderColor: isLineChart
+                    ? colors.border
+                    : labels.map((_, index) => {
+                        const palette = [
+                            "#16a34a",
+                            "#2563eb",
+                            "#f97316",
+                            "#8b5cf6",
+                            "#0891b2",
+                            "#ca8a04",
+                            "#db2777",
+                            "#475569"
+                        ];
+
+                        return palette[index % palette.length];
+                    }),
+
+                borderWidth: 2,
+
+                borderRadius: isLineChart ? 0 : 5,
+
+                tension: 0.35,
+
+                fill: isLineChart,
+
+                pointRadius: isLineChart ? 5 : 0,
+
+                pointHoverRadius: isLineChart ? 8 : 0,
+
+                pointBackgroundColor: colors.border
+            }]
+        },
+
+        options: {
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            animation: {
+                duration: 900
+            },
+
+            interaction: {
+                intersect: false,
+                mode: "index"
+            },
+
+            plugins: {
+                legend: {
+                    display: chartType === "pie",
+
+                    position: "bottom"
+                },
+
+                tooltip: {
+                    backgroundColor: "#14532d",
+
+                    titleColor: "#ffffff",
+
+                    bodyColor: "#ffffff",
+
+                    padding: 12,
+
+                    displayColors: true,
+
+                    callbacks: {
+                        label: function (context) {
+                            const value = context.parsed.y !== undefined
+                                ? context.parsed.y
+                                : context.parsed;
+
+                            return " Production: " +
+                                Number(value).toLocaleString("en-IN");
+                        }
+                    }
+                }
+            },
+
+            scales: chartType === "pie"
+                ? {}
+                : {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+
+                        ticks: {
+                            color: "#475569",
+
+                            maxRotation: 45,
+
+                            minRotation: 0,
+
+                            autoSkip: false,
+
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+
+                    y: {
+                        beginAtZero: true,
+
+                        grid: {
+                            color: "rgba(148, 163, 184, 0.18)"
+                        },
+
+                        ticks: {
+                            color: "#475569",
+
+                            callback: function (value) {
+                                return Number(value).toLocaleString("en-IN");
+                            }
+                        }
+                    }
+                }
+        }
+    });
+}
+    // ========================================
+    // LOAD PRODUCTION CHARTS
+    // ========================================
+
+    async function loadProductionCharts() {
+        const chartStatus = document.getElementById("chartStatus");
+
+        if (!chartStatus) {
+            console.error("Chart status element not found.");
+            return;
+        }
+
+        if (typeof Chart === "undefined") {
+            chartStatus.textContent =
+                "Chart.js load nahi hua. Internet connection check karein.";
+            chartStatus.className = "status-message error";
+            return;
+        }
+
+        chartStatus.textContent = "Loading chart data...";
+        chartStatus.className = "status-message";
+
+        try {
+            const params = new URLSearchParams(getFilters());
+
+            for (const [key, value] of [...params.entries()]) {
+                if (value === "") {
+                    params.delete(key);
+                }
+            }
+
+            const response = await fetch(
+                `/api/crop-production/charts?${params.toString()}`
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message || "Unable to load chart data."
+                );
+            }
+
+            const charts = data.charts;
+
+            const cropData = charts.crop_wise || [];
+            const stateData = charts.state_wise || [];
+
+// ========================================
+// TOTAL PRODUCTION CARD
+// ========================================
+
+const summaryProduction = document.getElementById("summaryProduction");
+
+
+
+const totalProduction = cropData.reduce((sum, item) => {
+    return sum + (Number(item.production) || 0);
+}, 0);
+
+if (summaryProduction) {
+    summaryProduction.textContent =
+        totalProduction.toLocaleString("en-IN", {
+            maximumFractionDigits: 2
+        });
+}
+
+// ========================================
+// TOTAL CULTIVATED AREA CARD
+// ========================================
+
+const summaryArea = document.getElementById("summaryArea");
+
+if (summaryArea) {
+    if (data.total_area !== undefined && data.total_area !== null) {
+        summaryArea.textContent =
+            Number(data.total_area).toLocaleString("en-IN", {
+                maximumFractionDigits: 3
+            });
+    } else {
+        summaryArea.textContent = "Not available";
+    }
+}
+
+// ========================================
+// UPDTE PRODUCTION SUMMARY CARDS
+// ========================================
+
+const summaryRecords = document.getElementById("summaryRecords");
+const summaryCrops = document.getElementById("summaryCrops");
+const summaryTopCrop = document.getElementById("summaryTopCrop");
+const summaryTopState = document.getElementById("summaryTopState");
+
+// Total matching records returned by the API
+summaryRecords.textContent =
+    Number(data.record_count || 0).toLocaleString("en-IN");
+
+// Different crops in the available records
+
+summaryCrops.textContent = new Set(
+    cropData.map(item => item.label)
+).size.toLocaleString("en-IN");
+
+// Crop with the highest production
+summaryTopCrop.textContent = cropData.length
+    ? cropData.reduce((a, b) =>
+        Number(a.production) >= Number(b.production) ? a : b
+      ).label
+    : "—";
+
+// State with the highest production
+
+
+summaryTopState.textContent = stateData.length
+    ? stateData.reduce((a, b) =>
+        Number(a.production) >= Number(b.production) ? a : b
+      ).label
+    : "—";
+
+            cropChartInstance = drawProductionChart(
+                "cropChart",
+                "bar",
+                charts.crop_wise || [],
+                cropChartInstance
+            );
+
+            stateChartInstance = drawProductionChart(
+                "stateChart",
+                "bar",
+                charts.state_wise || [],
+                stateChartInstance
+            );
+
+            seasonChartInstance = drawProductionChart(
+                "seasonChart",
+                "bar",
+                charts.season_wise || [],
+                seasonChartInstance
+            );
+
+            yearChartInstance = drawProductionChart(
+                "yearChart",
+                "line",
+                charts.year_wise || [],
+                yearChartInstance
+            );
+
+            chartStatus.textContent =
+                `Charts updated using ${data.record_count} matching records from data.gov.in.`;
+
+        } catch (error) {
+            console.error("Chart loading error:", error);
+
+            chartStatus.textContent =
+                error.message || "Unable to load chart data.";
+
+            chartStatus.className = "status-message error";
+            console.error("Charts API error details:", error);
+        }
+    }
+
+    // ========================================
+    // LOAD DISTRICT OPTIONS
+    // ========================================
+
+    async function loadDistrictOptions() {
+        const requestId = ++districtRequestId;
+        const state = stateInput.value.trim();
+        const previousDistrict = districtInput.value.trim();
+
+         districtOptions.replaceChildren();
+
+        if (!state) {
+            districtInput.disabled = true;
+            districtInput.placeholder = "Select state first";
+            return;
+        }
+
+        districtInput.disabled = true;
+        districtInput.placeholder = "Loading districts...";
+
+        try {
+            const params = new URLSearchParams({ state });
+
+            const response = await fetch(
+                `/api/crop-production/districts?${params.toString()}`
+            );
+
+            const data = await response.json();
+
+            if (requestId !== districtRequestId) {
+                return;
+            }
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message || "Could not load district suggestions."
+                );
+            }
+
+            (data.districts || []).forEach(district => {
+    const option = document.createElement("option");
+    option.value = district;
+    districtOptions.appendChild(option);
+});
+
+// Keep the previous district if it is still valid
+if (
+    previousDistrict &&
+    (data.districts || []).some(
+        district =>
+            district.toLowerCase() === previousDistrict.toLowerCase()
+    )
+) {
+    districtInput.value = previousDistrict;
+}
+
+districtInput.disabled = false;
+
+            districtInput.placeholder = data.districts.length
+                ? "Select or type district"
+                : "No district suggestions found";
+
+        } catch (error) {
+            if (requestId !== districtRequestId) {
+                return;
+            }
+
+            districtInput.disabled = false;
+            districtInput.placeholder = "Enter district manually";
+
+            console.error("District lookup failed:", error);
+        }
+    }
+    stateInput.addEventListener("change", async function () {
+    await loadDistrictOptions();
+    await loadAvailableYears();
+});
+
+    stateInput.addEventListener("input", function () {
+        clearTimeout(districtSearchTimer);
+        districtSearchTimer = setTimeout(loadDistrictOptions, 500);
+    });
+
+    // ========================================
+// LOAD AVAILABLE YEARS
+// ========================================
+
+let yearRequestId = 0;
+
+async function loadAvailableYears() {
+    const requestId = ++yearRequestId;
+
+    // Keep the currently selected year if it remains available.
+    const previousYear = yearInput.value;
+
+    yearInput.disabled = true;
+
+    try {
+        const params = new URLSearchParams();
+
+        const state = stateInput.value.trim();
+        const district = districtInput.value.trim();
+        const crop = document.getElementById("crop").value.trim();
+        const season = document.getElementById("season").value;
+
+        if (state) params.set("state", state);
+        if (district) params.set("district", district);
+        if (crop) params.set("crop", crop);
+        if (season) params.set("season", season);
+
+        const response = await fetch(
+            `/api/crop-production/years?${params.toString()}`
+        );
+
+        const data = await response.json();
+
+        // Ignore an older request if the filters changed again.
+        if (requestId !== yearRequestId) {
+            return;
+        }
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.message || "Available years could not be loaded."
+            );
+        }
+
+        const years = Array.isArray(data.years) ? data.years : [];
+
+        // Rebuild dropdown options.
+        yearInput.replaceChildren();
+
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = "All Available Years";
+
+        yearInput.appendChild(defaultOption);
+
+        years.forEach(year => {
+            const option = document.createElement("option");
+
+            option.value = String(year);
+            option.textContent = String(year);
+
+            yearInput.appendChild(option);
+        });
+
+        // Preserve the previous selection if still available.
+        if (years.some(year => String(year) === previousYear)) {
+            yearInput.value = previousYear;
+        } else {
+            yearInput.value = "";
+        }
+
+    } catch (error) {
+        if (requestId !== yearRequestId) {
+            return;
+        }
+
+        console.error("Year lookup failed:", error);
+
+        // Do not leave a misleading list of years.
+        yearInput.replaceChildren();
+
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "Years unavailable — try again";
+
+        yearInput.appendChild(option);
+
+    } finally {
+        if (requestId === yearRequestId) {
+            yearInput.disabled = false;
+        }
+    }
+}
+
+    // ========================================
+    // GET SEARCH FILTERS
+    // ========================================
+
+    function getFilters() {
+        return {
+            state: stateInput.value.trim(),
+            district: districtInput.value.trim(),
+            crop: document.getElementById("crop").value.trim(),
+            season: document.getElementById("season").value,
+            year: document.getElementById("year").value.trim()
+        };
+    }
+
+    // ========================================
+    // CREATE TABLE CELL
+    // ========================================
+
+    function addCell(row, value) {
+        const cell = document.createElement("td");
+
+        cell.textContent =
+            value === null || value === undefined || value === ""
+                ? "—"
+                : String(value);
+
+        row.appendChild(cell);
+    }
+
+    // ========================================
+    // LOAD PRODUCTION DATA
+    // ========================================
+
+    async function loadProductionData() {
+        if (loading) {
+            return;
+        }
+
+        loading = true;
+
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+
+        statusMessage.textContent = "Fetching production data...";
+        statusMessage.className = "status-message";
+
+        tableBody.replaceChildren();
+
+        try {
+            const params = new URLSearchParams({
+                ...getFilters(),
+                limit: String(limit),
+                offset: String(offset)
+            });
+
+            for (const [key, value] of [...params.entries()]) {
+                if (value === "") {
+                    params.delete(key);
+                }
+            }
+
+            const response = await fetch(
+                `/api/crop-production?${params.toString()}`
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message || "Unable to load production records."
+                );
+            }
+
+            const records = data.records || [];
+            total = Number(data.total) || 0;
+
+            totalRecords.textContent = total.toLocaleString("en-IN");
+            pageRecords.textContent = records.length;
+            currentPage.textContent = Math.floor(offset / limit) + 1;
+
+            if (records.length === 0) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+
+                cell.colSpan = 7;
+                cell.textContent =
+                    "No matching production records found.";
+
+                row.appendChild(cell);
+                tableBody.appendChild(row);
+
+                statusMessage.textContent = "No matching records found.";
+
+            } else {
+                records.forEach(item => {
+                    const row = document.createElement("tr");
+
+                    addCell(row, item.crop_year);
+                    addCell(row, item.state_name);
+                    addCell(row, item.district_name);
+                    addCell(row, item.crop);
+                    addCell(row, item.season);
+                    addCell(row, item.area_);
+                    addCell(row, item.production_);
+
+                    tableBody.appendChild(row);
+                });
+
+                statusMessage.textContent =
+                    `Showing ${records.length} records from data.gov.in.`;
+            }
+
+            pageInfo.textContent =
+                `Page ${Math.floor(offset / limit) + 1}`;
+
+            prevBtn.disabled = offset <= 0;
+
+            nextBtn.disabled =
+                offset + records.length >= total ||
+                records.length === 0;
+
+        } catch (error) {
+            tableBody.replaceChildren();
+
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+
+            cell.colSpan = 7;
+            cell.textContent = "Production data could not be loaded.";
+
+            row.appendChild(cell);
+            tableBody.appendChild(row);
+
+            statusMessage.textContent =
+                error.message || "An unexpected error occurred.";
+
+            statusMessage.className = "status-message error";
+
+            totalRecords.textContent = "—";
+            pageRecords.textContent = "—";
+            currentPage.textContent = "1";
+            pageInfo.textContent = "Page 1";
+
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+
+        } finally {
+            loading = false;
+        }
+    }
+
+    // ========================================
+    // SEARCH BUTTON
+    // ========================================
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        if (loading) {
+            return;
+        }
+
+        offset = 0;
+
+        loadProductionData();
+        loadProductionCharts();
+    });
+
+    // ========================================
+    // CLEAR BUTTON
+    // ========================================
+
+    clearBtn.addEventListener("click", function () {
+        if (loading) {
+            return;
+        }
+
+        form.reset();
+
+        offset = 0;
+        total = 0;
+        yearRequestId++;
+yearInput.disabled = false;
+
+        districtRequestId++;
+        clearTimeout(districtSearchTimer);
+
+        districtOptions.replaceChildren();
+
+        districtInput.value = "";
+        districtInput.disabled = true;
+        districtInput.placeholder = "Select state first";
+
+        tableBody.replaceChildren();
+
+        totalRecords.textContent = "0";
+        pageRecords.textContent = "0";
+        currentPage.textContent = "1";
+        pageInfo.textContent = "Page 1";
+
+        statusMessage.textContent =
+            "Select filters and click Search.";
+
+        statusMessage.className = "status-message";
+
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+
+        // Clear old charts
+        [
+            cropChartInstance,
+            stateChartInstance,
+            seasonChartInstance,
+            yearChartInstance
+        ].forEach(chart => {
+            if (chart) {
+                chart.destroy();
+            }
+            loadAvailableYears();
+        });
+
+        cropChartInstance = null;
+        stateChartInstance = null;
+        seasonChartInstance = null;
+        yearChartInstance = null;
+
+        const chartStatus = document.getElementById("chartStatus");
+
+        if (chartStatus) {
+            chartStatus.textContent =
+                "Search for crop production data to view charts.";
+            chartStatus.className = "status-message";
+        }
+    });
+
+    // ========================================
+    // PREVIOUS PAGE
+    // ========================================
+
+    prevBtn.addEventListener("click", function () {
+        if (!loading && offset >= limit) {
+            offset -= limit;
+            loadProductionData();
+        }
+    });
+
+    // ========================================
+    // NEXT PAGE
+    // ========================================
+
+    nextBtn.addEventListener("click", function () {
+        if (!loading && offset + limit < total) {
+            offset += limit;
+            loadProductionData();
+        }
+    });
+
+    // ========================================
+    // INITIAL PAGE STATE
+    // ========================================
+
+    tableBody.replaceChildren();
+
+    statusMessage.textContent =
+        "Select filters and click Search.";
+
+    statusMessage.className = "status-message";
+
+    totalRecords.textContent = "0";
+    pageRecords.textContent = "0";
+    currentPage.textContent = "1";
+    pageInfo.textContent = "Page 1";
+
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    loadAvailableYears();
+</script>
+
+<!-- Leaflet Map Library -->
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Leaflet Map Library -->
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
+
+    const mapElement = document.getElementById("indiaCropMap");
+
+    if (!mapElement || typeof L === "undefined") {
+        console.error("Map container or Leaflet not found.");
+        return;
+    }
+
+    const indiaMap = L.map("indiaCropMap").setView([22.5, 82.5], 4.5);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 10
+    }).addTo(indiaMap);
+
+    let stateLayer;
+    let productionByState = {};
+    let selectedState = null;
+
+    // Normalize state names for matching
+    function normalizeStateName(name) {
+        return String(name || "")
+            .trim()
+            .toLowerCase()
+            .replace(/&/g, "and")
+            .replace(/[^a-z0-9]/g, "");
+    }
+
+    // State names that differ between datasets
+    function getStateAliases(name) {
+        const normalized = normalizeStateName(name);
+
+        const aliases = {
+            "orissa": "odisha",
+            "jammuandkashmir": "jammuandkashmir",
+            "dadraandnagarhaveli": "dadraandnagarhaveli",
+            "andamanandnicobarislands": "andamanandnicobar"
+        };
+
+        return aliases[normalized] || normalized;
+    }
+
+    function getProductionValue(stateName) {
+        const key = getStateAliases(stateName);
+        return productionByState[key];
+    }
+
+    // Green shades based on the actual production range
+    function getProductionColor(production) {
+        if (production === undefined || production === null) {
+            return "#eeeeee";
+        }
+
+        const values = Object.values(productionByState)
+            .filter(value => Number.isFinite(value));
+
+        if (values.length === 0) {
+            return "#eeeeee";
+        }
+
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+
+        if (max === min) return "#78c679";
+
+        const ratio = (production - min) / (max - min);
+
+        if (ratio >= 0.75) return "#006837";
+        if (ratio >= 0.50) return "#31a354";
+        if (ratio >= 0.25) return "#78c679";
+
+        return "#c2e699";
+    }
+
+    function getStateName(feature) {
+        const p = feature.properties || {};
+
+        return p.ST_NM ||
+               p.st_nm ||
+               p.NAME_1 ||
+               p.name ||
+               p.NAME ||
+               "Unknown State";
+    }
+
+    function styleState(feature) {
+        const name = getStateName(feature);
+        const production = getProductionValue(name);
+
+        return {
+            color: "#ffffff",
+            weight: 1.2,
+            fillColor: name === selectedState
+                ? "#f4c542"
+                : getProductionColor(production),
+            fillOpacity: 0.8
+        };
+    }
+
+    // Load production for all states using current filters
+    async function loadStateProduction() {
+        const params = new URLSearchParams();
+
+        const crop = document.getElementById("crop");
+        const season = document.getElementById("season");
+        const year = document.getElementById("year");
+
+        if (crop && crop.value) params.set("crop", crop.value);
+        if (season && season.value) params.set("season", season.value);
+        if (year && year.value) params.set("year", year.value);
+
+        const response = await fetch(
+            "/api/crop-production/map?" + params.toString()
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Could not load map production.");
+        }
+
+        productionByState = {};
+
+        (data.state_production || []).forEach(item => {
+            const key = getStateAliases(item.state);
+            productionByState[key] = Number(item.production);
+        });
+
+        if (stateLayer) {
+            stateLayer.setStyle(styleState);
+        }
+    }
+
+    try {
+        const response = await fetch("/static/india.geojson");
+
+        if (!response.ok) {
+            throw new Error("GeoJSON could not load.");
+        }
+
+        const geoJSON = await response.json();
+
+        stateLayer = L.geoJSON(geoJSON, {
+            style: styleState,
+
+            onEachFeature: function (feature, layer) {
+                const stateName = getStateName(feature);
+
+                layer.bindTooltip(stateName);
+
+                layer.on("mouseover", function () {
+                    layer.setStyle({
+                        weight: 2,
+                        color: "#333333",
+                        fillOpacity: 0.95
+                    });
+                    layer.bringToFront();
+                });
+
+                layer.on("mouseout", function () {
+                    stateLayer.resetStyle(layer);
+                });
+
+                layer.on("click", async function () {
+                    selectedState = stateName;
+                    stateLayer.setStyle(styleState);
+
+                    const nameElement = document.getElementById("mapStateName");
+                    const productionElement = document.getElementById("mapProduction");
+                    const areaElement = document.getElementById("mapArea");
+                    const messageElement = document.getElementById("mapMessage");
+
+                    nameElement.textContent = stateName;
+                    productionElement.textContent = "Loading...";
+                    areaElement.textContent = "Loading...";
+                    messageElement.textContent = "Fetching data...";
+
+                    try {
+                        const params = new URLSearchParams();
+                        params.set("state", stateName);
+
+                        const crop = document.getElementById("crop");
+                        const season = document.getElementById("season");
+                        const year = document.getElementById("year");
+
+                        if (crop && crop.value) params.set("crop", crop.value);
+                        if (season && season.value) params.set("season", season.value);
+                        if (year && year.value) params.set("year", year.value);
+
+                        const apiResponse = await fetch(
+                            "/api/crop-production/charts?" + params.toString()
+                        );
+
+                        const data = await apiResponse.json();
+
+                        if (!apiResponse.ok || !data.success) {
+                            throw new Error(data.message || "Data unavailable.");
+                        }
+
+                        const formatter = new Intl.NumberFormat("en-IN", {
+                            maximumFractionDigits: 2
+                        });
+
+                        const production = (data.charts?.state_wise || [])
+                            .reduce((sum, item) => {
+                                return sum + Number(item.production || 0);
+                            }, 0);
+
+                        productionElement.textContent = formatter.format(production);
+                        areaElement.textContent = formatter.format(
+                            Number(data.total_area || 0)
+                        );
+
+                        messageElement.textContent =
+                            "Matching records: " + data.record_count;
+
+                    } catch (error) {
+                        console.error("State data error:", error);
+
+                        productionElement.textContent = "Unavailable";
+                        areaElement.textContent = "Unavailable";
+                        messageElement.textContent = "State data could not load.";
+                    }
+                });
+            }
+        }).addTo(indiaMap);
+
+        if (stateLayer.getBounds().isValid()) {
+            indiaMap.fitBounds(stateLayer.getBounds(), {
+                padding: [10, 10]
+            });
+        }
+
+        document.getElementById("mapStateName").textContent = "India Map";
+        document.getElementById("mapProduction").textContent = "--";
+        document.getElementById("mapArea").textContent = "--";
+        document.getElementById("mapMessage").textContent =
+            "Loading state-wise crop production...";
+
+        try {
+            await loadStateProduction();
+
+            document.getElementById("mapMessage").textContent =
+                "Click a state to view crop data.";
+
+        } catch (error) {
+            console.error("Production colors could not load:", error);
+
+            document.getElementById("mapMessage").textContent =
+                "Production colors unavailable. Check the API.";
+        }
+
+        // Refresh colors when filters change
+        ["crop", "season", "year"].forEach(id => {
+            const element = document.getElementById(id);
+
+            if (element) {
+                element.addEventListener("change", async function () {
+                    document.getElementById("mapMessage").textContent =
+                        "Updating production colors...";
+
+                    try {
+                        await loadStateProduction();
+
+                        document.getElementById("mapMessage").textContent =
+                            "Map updated. Click a state to view details.";
+
+                    } catch (error) {
+                        console.error("Map refresh error:", error);
+
+                        document.getElementById("mapMessage").textContent =
+                            "Could not update production colors.";
+                    }
+                });
+            }
+        });
+
+        setTimeout(function () {
+            indiaMap.invalidateSize();
+        }, 200);
+
+        console.log("India production map loaded.");
+
+    } catch (error) {
+        console.error("India map error:", error);
+
+        document.getElementById("mapMessage").textContent =
+            "Map boundaries could not load.";
+    }
+});
+</script>
+</body>
+</html>

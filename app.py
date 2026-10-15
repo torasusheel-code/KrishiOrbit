@@ -1,6 +1,6 @@
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, session, flash
+    url_for, session, flash, jsonify, send_file, Response
 )
 import sqlite3
 import os
@@ -13,10 +13,21 @@ import subprocess
 from functools import wraps
 from werkzeug.utils import secure_filename
 import uuid
-
-load_dotenv()
+import io
+import csv
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from collections import defaultdict
+load_dotenv(
+    dotenv_path=os.path.join(os.path.dirname(__file__), ".env"),
+    override=True
+)
 
 app = Flask(__name__)
+
+DATA_GOV_API_KEY = os.getenv("DATA_GOV_API_KEY")
+
+CROP_PRODUCTION_API_KEY = os.getenv("CROP_PRODUCTION_API_KEY")
 
 # ---------------- ADMIN CONFIGURATION ----------------
 
@@ -48,8 +59,1028 @@ app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
 WEATHER_CACHE = {}
 WEATHER_CACHE_SECONDS = 1800
 
-DATA_GOV_API_KEY = os.getenv("DATA_GOV_API_KEY")
+# ---------------- CROP PRODUCTION API ----------------
 
+CROP_PRODUCTION_RESOURCE_ID = (
+    "35be999b-0208-4354-b557-f6ca9a5355de"
+)
+
+CROP_PRODUCTION_API_URL = (
+    "https://api.data.gov.in/resource/"
+    + CROP_PRODUCTION_RESOURCE_ID
+)
+
+CROP_PRODUCTION_API_KEY = os.getenv(
+    "CROP_PRODUCTION_API_KEY"
+)
+# ---------------- EXTENDED CROP INFORMATION ----------------
+
+CROP_EXTRA_INFO = {
+    "wheat": {
+        "soil": "Well-drained loamy soil is generally suitable.",
+        "sowing_time": "Rabi season; timing depends on the region.",
+        "irrigation": "Irrigation needs depend on soil, rainfall and crop stage.",
+        "care": "Monitor weeds, pests and diseases regularly."
+    },
+    "rice": {
+        "soil": "Soil suitability depends on the rice variety and local conditions.",
+        "sowing_time": "Usually grown during Kharif in many Indian regions.",
+        "irrigation": "Water management depends on the cultivation method.",
+        "care": "Monitor weeds, pests and diseases regularly."
+    },
+    "maize": {
+        "soil": "Well-drained soil is generally preferred.",
+        "sowing_time": "Often grown during Kharif; regional seasons vary.",
+        "irrigation": "Water requirements depend on weather and crop stage.",
+        "care": "Monitor weeds, pests and diseases regularly."
+    }
+}
+
+# -------- CROP PRODUCTION EXPORT HELPER --------
+
+def get_crop_production_export_records(filters):
+    """
+    Fetch matching crop production records for CSV/Excel export.
+    Uses the same government API as the existing dashboard.
+    """
+
+    if not CROP_PRODUCTION_API_KEY:
+        raise ValueError("Crop production API key is not configured.")
+
+    records = []
+    offset = 0
+    limit = 100
+    max_pages = 100
+
+    for _ in range(max_pages):
+        params = {
+            "api-key": CROP_PRODUCTION_API_KEY,
+            "format": "json",
+            "limit": limit,
+            "offset": offset
+        }
+
+        api_filters = {
+            "filters[state_name]": filters.get("state", "").strip(),
+            "filters[district_name]": filters.get("district", "").strip(),
+            "filters[crop]": filters.get("crop", "").strip(),
+            "filters[season]": filters.get("season", "").strip(),
+            "filters[crop_year]": filters.get("year", "").strip()
+        }
+
+        params.update({
+            key: value
+            for key, value in api_filters.items()
+            if value
+        })
+
+        data = fetch_crop_production_data(params)
+
+        if not isinstance(data, dict):
+            raise ValueError("Unexpected government API response.")
+
+        if data.get("error") or data.get("status") == "error":
+            raise ValueError("Government API returned an error.")
+
+        batch = data.get("records", [])
+
+        if not isinstance(batch, list):
+            raise ValueError("Invalid records received from API.")
+
+        if not batch:
+            break
+
+        records.extend(
+            record for record in batch
+            if isinstance(record, dict)
+        )
+
+        offset += len(batch)
+
+        total = int(data.get("total", 0))
+
+        if offset >= total or len(batch) < limit:
+            break
+
+    return records
+# -------- CROP PRODUCTION CHARTS API --------
+
+@app.route("/api/crop-production/charts")
+def crop_production_charts_api():
+
+    filters = {
+        "state": request.args.get("state", "").strip(),
+        "district": request.args.get("district", "").strip(),
+        "crop": request.args.get("crop", "").strip(),
+        "season": request.args.get("season", "").strip(),
+        "year": request.args.get("year", "").strip()
+    }
+
+    if filters["year"] and not filters["year"].isdigit():
+        return jsonify({
+            "success": False,
+            "message": "Year must be a valid number."
+        }), 400
+
+    try:
+        records = get_crop_production_export_records(filters)
+
+        crop_totals = defaultdict(float)
+        state_totals = defaultdict(float)
+        season_totals = defaultdict(float)
+        yearly_totals = defaultdict(float)
+
+        total_area = 0.0
+
+        for item in records:
+            crop_name = str(item.get("crop") or "Unknown")
+            state_name = str(item.get("state_name") or "Unknown")
+            season_name = str(item.get("season") or "Unknown")
+            year_value = item.get("crop_year")
+
+            production_value = item.get("production_")
+            area_value = item.get("area_")
+
+            # Calculate total cultivated area
+            try:
+                area = float(area_value)
+
+                if area >= 0:
+                    total_area += area
+
+            except (ValueError, TypeError):
+                pass
+
+            # Aggregate production
+            try:
+                production = float(production_value)
+
+                if production < 0:
+                    continue
+
+            except (ValueError, TypeError):
+                continue
+
+            crop_totals[crop_name] += production
+            state_totals[state_name] += production
+            season_totals[season_name] += production
+
+            if year_value not in (None, ""):
+                try:
+                    year_label = str(int(float(year_value)))
+                    yearly_totals[year_label] += production
+                except (ValueError, TypeError):
+                    pass
+
+        # Sort chart values by production
+        def sorted_items(values):
+            return [
+                {
+                    "label": label,
+                    "production": round(value, 3)
+                }
+                for label, value in sorted(
+                    values.items(),
+                    key=lambda pair: pair[1],
+                    reverse=True
+                )
+            ]
+
+        return jsonify({
+            "success": True,
+            "source": "data.gov.in",
+            "record_count": len(records),
+            "total_area": round(total_area, 3),
+
+            "charts": {
+                "crop_wise": sorted_items(crop_totals),
+                "state_wise": sorted_items(state_totals),
+                "season_wise": sorted_items(season_totals),
+
+                "year_wise": [
+                    {
+                        "label": year,
+                        "production": round(
+                            yearly_totals[year], 3
+                        )
+                    }
+                    for year in sorted(
+                        yearly_totals,
+                        key=int
+                    )
+                ]
+            }
+        })
+
+    except (requests.RequestException, subprocess.TimeoutExpired) as e:
+        app.logger.exception(
+            "Crop production charts API request failed."
+        )
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to fetch data for charts.",
+            "error_type": type(e).__name__,
+            "error_details": str(e)[:500]
+        }), 502
+
+    except (ValueError, TypeError) as e:
+        app.logger.exception(
+            "Crop production charts API failed."
+        )
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to process chart data.",
+            "error_type": type(e).__name__,
+            "error_details": str(e)[:500]
+        }), 502
+
+    except Exception:
+        app.logger.exception(
+            "Unexpected crop production charts error."
+        )
+
+        return jsonify({
+            "success": False,
+            "message": "An unexpected error occurred while loading charts."
+        }), 500
+
+# -------- CROP PRODUCTION MAP API --------
+
+@app.route("/api/crop-production/map")
+def crop_production_map_api():
+    filters = {
+        "state": "",
+        "district": "",
+        "crop": request.args.get("crop", "").strip(),
+        "season": request.args.get("season", "").strip(),
+        "year": request.args.get("year", "").strip()
+    }
+
+    if filters["year"] and not filters["year"].isdigit():
+        return jsonify({
+            "success": False,
+            "message": "Invalid year."
+        }), 400
+
+    try:
+        records = get_crop_production_export_records(filters)
+
+        state_totals = defaultdict(float)
+
+        for item in records:
+            state_name = str(
+                item.get("state_name") or ""
+            ).strip()
+
+            production_value = item.get("production_")
+
+            if not state_name:
+                continue
+
+            try:
+                production = float(production_value)
+
+                if production >= 0:
+                    state_totals[state_name] += production
+
+            except (ValueError, TypeError):
+                continue
+
+        return jsonify({
+            "success": True,
+            "source": "data.gov.in",
+            "state_production": [
+                {
+                    "state": state,
+                    "production": round(total, 3)
+                }
+                for state, total in sorted(
+                    state_totals.items(),
+                    key=lambda item: item[1],
+                    reverse=True
+                )
+            ]
+        })
+
+    except (requests.RequestException, subprocess.TimeoutExpired,
+            ValueError, TypeError) as e:
+        app.logger.exception(
+            "Crop production map API failed."
+        )
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to load state-wise production.",
+            "error_type": type(e).__name__
+        }), 502
+
+# ---------------- CROP PRODUCTION API HELPER ----------------
+
+def fetch_crop_production_data(params):
+    """
+    Fetch crop production data from data.gov.in.
+
+    Windows:
+        Uses curl.exe.
+
+    Linux / Render:
+        Uses requests.
+    """
+
+    if os.name == "nt":
+
+        # Build curl command
+        command = [
+            "curl.exe",
+            "-sS",
+            "--fail",
+            "--retry", "2",
+            "--retry-delay", "1",
+            "--connect-timeout", "10",
+            "--max-time", "30",
+            "-G",
+            CROP_PRODUCTION_API_URL,
+        ]
+
+        # Add API parameters
+        for key, value in params.items():
+            command.extend([
+                "--data-urlencode",
+                f"{key}={value}",
+            ])
+
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=35,
+                check=False,
+            )
+
+        except subprocess.TimeoutExpired as exc:
+            app.logger.error(
+                "Crop production API curl timed out."
+            )
+            raise requests.Timeout(
+                "Crop production API request timed out."
+            ) from exc
+
+        # Check curl errors
+        if result.returncode != 0:
+            app.logger.error(
+                "Crop API curl failed. Return code: %s",
+                result.returncode,
+            )
+
+            app.logger.error(
+                "Crop API curl stderr: %s",
+                result.stderr[:1000],
+            )
+
+            app.logger.error(
+                "Crop API curl stdout: %s",
+                result.stdout[:500],
+            )
+
+            raise requests.RequestException(
+                f"Crop production curl failed with code "
+                f"{result.returncode}: {result.stderr[:300]}"
+            )
+
+        # Parse JSON response
+        try:
+            return json.loads(result.stdout)
+
+        except json.JSONDecodeError as exc:
+            app.logger.error(
+                "Crop production API returned invalid JSON."
+            )
+            raise ValueError(
+                "Invalid JSON from crop production API."
+            ) from exc
+
+    # ---------------- LINUX / RENDER ----------------
+
+    response = requests.get(
+        CROP_PRODUCTION_API_URL,
+        params=params,
+        timeout=(10, 20),
+    )
+
+    response.raise_for_status()
+
+    try:
+        return response.json()
+
+    except ValueError as exc:
+        app.logger.error(
+            "Crop production API returned invalid JSON."
+        )
+        raise ValueError(
+            "Invalid JSON from crop production API."
+        ) from exc
+
+# -------- CROP PRODUCTION CSV DOWNLOAD --------
+
+@app.route("/api/crop-production/download/csv")
+def download_crop_production_csv():
+
+    filters = {
+        "state": request.args.get("state", ""),
+        "district": request.args.get("district", ""),
+        "crop": request.args.get("crop", ""),
+        "season": request.args.get("season", ""),
+        "year": request.args.get("year", "")
+    }
+
+    if filters["year"] and not filters["year"].isdigit():
+        return jsonify({
+            "success": False,
+            "message": "Year must be a valid number."
+        }), 400
+
+    try:
+        records = get_crop_production_export_records(filters)
+
+        output = io.StringIO(newline="")
+
+        writer = csv.writer(output)
+
+        writer.writerow([
+            "Crop Year",
+            "State",
+            "District",
+            "Crop",
+            "Season",
+            "Area",
+            "Production"
+        ])
+
+        for item in records:
+            writer.writerow([
+                item.get("crop_year", ""),
+                item.get("state_name", ""),
+                item.get("district_name", ""),
+                item.get("crop", ""),
+                item.get("season", ""),
+                item.get("area_", ""),
+                item.get("production_", "")
+            ])
+
+        csv_content = "\ufeff" + output.getvalue()
+
+        return Response(
+            csv_content,
+            mimetype="text/csv; charset=utf-8",
+            headers={
+                "Content-Disposition":
+                    "attachment; filename=crop_production.csv"
+            }
+        )
+
+    except (requests.RequestException, subprocess.TimeoutExpired):
+        app.logger.exception("CSV export API request failed.")
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to fetch data for CSV export."
+        }), 502
+
+    except (ValueError, TypeError):
+        app.logger.exception("CSV export failed.")
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to prepare CSV file."
+        }), 502
+
+# -------- CROP PRODUCTION EXCEL DOWNLOAD --------
+
+@app.route("/api/crop-production/download/excel")
+def download_crop_production_excel():
+
+    filters = {
+        "state": request.args.get("state", ""),
+        "district": request.args.get("district", ""),
+        "crop": request.args.get("crop", ""),
+        "season": request.args.get("season", ""),
+        "year": request.args.get("year", "")
+    }
+
+    if filters["year"] and not filters["year"].isdigit():
+        return jsonify({
+            "success": False,
+            "message": "Year must be a valid number."
+        }), 400
+
+    try:
+        records = get_crop_production_export_records(filters)
+
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "Crop Production"
+
+        headers = [
+            "Crop Year",
+            "State",
+            "District",
+            "Crop",
+            "Season",
+            "Area",
+            "Production"
+        ]
+
+        sheet.append(headers)
+
+        for cell in sheet[1]:
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.fill = PatternFill(
+                fill_type="solid",
+                fgColor="176B3A"
+            )
+            cell.alignment = Alignment(horizontal="center")
+
+        for item in records:
+            sheet.append([
+                item.get("crop_year", ""),
+                item.get("state_name", ""),
+                item.get("district_name", ""),
+                item.get("crop", ""),
+                item.get("season", ""),
+                item.get("area_", ""),
+                item.get("production_", "")
+            ])
+
+        # Set readable column widths
+        widths = {
+            "A": 14,
+            "B": 25,
+            "C": 25,
+            "D": 28,
+            "E": 18,
+            "F": 16,
+            "G": 18
+        }
+
+        for column, width in widths.items():
+            sheet.column_dimensions[column].width = width
+
+        sheet.freeze_panes = "A2"
+        sheet.auto_filter.ref = sheet.dimensions
+
+        output = io.BytesIO()
+        workbook.save(output)
+        output.seek(0)
+
+        return send_file(
+            output,
+            as_attachment=True,
+            download_name="crop_production.xlsx",
+            mimetype=(
+                "application/vnd.openxmlformats-officedocument."
+                "spreadsheetml.sheet"
+            )
+        )
+
+    except (requests.RequestException, subprocess.TimeoutExpired):
+        app.logger.exception("Excel export API request failed.")
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to fetch data for Excel export."
+        }), 502
+
+    except (ValueError, TypeError):
+        app.logger.exception("Excel export failed.")
+
+        return jsonify({
+            "success": False,
+            "message": "Unable to prepare Excel file."
+        }), 502
+# ---------------- CROP PRODUCTION DATA API ----------------
+
+@app.route("/api/crop-production")
+def crop_production_api():
+
+    app.logger.info(
+        "Crop production API key configured: %s",
+        bool(CROP_PRODUCTION_API_KEY)
+    )
+
+    # Check API key
+    if not CROP_PRODUCTION_API_KEY:
+        return {
+            "success": False,
+            "message": "Crop production API key is not configured."
+        }, 503
+
+    # Read filters
+    state = request.args.get("state", "").strip()
+    district = request.args.get("district", "").strip()
+    crop = request.args.get("crop", "").strip()
+    season = request.args.get("season", "").strip()
+    year = request.args.get("year", "").strip()
+
+    # Validate limit and offset
+    try:
+        limit = int(request.args.get("limit", 10))
+        offset = int(request.args.get("offset", 0))
+
+    except ValueError:
+        return {
+            "success": False,
+            "message": "Limit and offset must be valid numbers."
+        }, 400
+
+    if not 1 <= limit <= 100:
+        return {
+            "success": False,
+            "message": "Limit must be between 1 and 100."
+        }, 400
+
+    if offset < 0:
+        return {
+            "success": False,
+            "message": "Offset cannot be negative."
+        }, 400
+
+    if year and not year.isdigit():
+        return {
+            "success": False,
+            "message": "Year must be a valid number."
+        }, 400
+
+    # Build API parameters
+    params = {
+        "api-key": CROP_PRODUCTION_API_KEY,
+        "format": "json",
+        "limit": limit,
+        "offset": offset,
+        "sort[crop_year]": "desc"
+    }
+
+    filters = {
+        "filters[state_name]": state,
+        "filters[district_name]": district,
+        "filters[crop]": crop,
+        "filters[season]": season,
+        "filters[crop_year]": year
+    }
+
+    params.update({
+        key: value
+        for key, value in filters.items()
+        if value
+    })
+    app.logger.info(
+    "Crop filters received: state=%r, district=%r, crop=%r, season=%r, year=%r",
+    state, district, crop, season, year
+)
+
+    # Fetch data and return response
+    try:
+        data = fetch_crop_production_data(params)
+
+        if not isinstance(data, dict):
+            return {
+                "success": False,
+                "message": "Unexpected response from crop production API."
+            }, 502
+
+        if data.get("error") or data.get("status") == "error":
+            app.logger.error(
+                "Government crop API returned an error."
+            )
+
+            return {
+                "success": False,
+                "message": "Government API returned an error."
+            }, 502
+
+        records = data.get("records")
+
+        if not isinstance(records, list):
+            return {
+                "success": False,
+                "message": "Crop production records are unavailable."
+            }, 502
+
+        return {
+            "success": True,
+            "source": "data.gov.in",
+            "total": int(data.get("total", 0)),
+            "count": len(records),
+            "limit": limit,
+            "offset": offset,
+            "filters": {
+                "state": state,
+                "district": district,
+                "crop": crop,
+                "season": season,
+                "year": year
+            },
+            "records": records
+        }
+
+    except subprocess.TimeoutExpired:
+        app.logger.warning(
+            "Crop production API command timed out."
+        )
+
+        return {
+            "success": False,
+            "message": "Crop production API timed out. Please try again."
+        }, 504
+
+    except requests.Timeout:
+        app.logger.warning(
+            "Crop production API request timed out."
+        )
+
+        return {
+            "success": False,
+            "message": "Crop production API timed out. Please try again."
+        }, 504
+
+    except requests.RequestException:
+        app.logger.exception(
+            "Crop production API request failed."
+        )
+
+        return {
+            "success": False,
+            "message": "Unable to fetch crop production data right now."
+        }, 502
+
+    except (ValueError, TypeError):
+        app.logger.exception(
+            "Invalid crop production API response."
+        )
+
+        return {
+            "success": False,
+            "message": "Crop production API returned invalid data."
+        }, 502
+# ---------------- CROP PRODUCTION DISTRICT OPTIONS API ----------------
+
+@app.route("/api/crop-production/districts")
+def crop_production_districts_api():
+
+    state = request.args.get("state", "").strip()
+
+    if not state:
+        return {
+            "success": False,
+            "message": "Please select a state first.",
+            "districts": []
+        }, 400
+
+    if not CROP_PRODUCTION_API_KEY:
+        return {
+            "success": False,
+            "message": "Crop production API key is not configured.",
+            "districts": []
+        }, 503
+
+    districts = set()
+    page_size = 100
+    max_pages = 20
+
+    try:
+        for page in range(max_pages):
+
+            params = {
+                "api-key": CROP_PRODUCTION_API_KEY,
+                "format": "json",
+                "limit": page_size,
+                "offset": page * page_size,
+                "filters[state_name]": state
+            }
+
+            app.logger.info(
+                "Fetching districts: state=%s, page=%s, offset=%s",
+                state,
+                page + 1,
+                page * page_size
+            )
+
+            data = fetch_crop_production_data(params)
+
+            if not isinstance(data, dict):
+                return {
+                    "success": False,
+                    "message": "Unexpected API response.",
+                    "districts": []
+                }, 502
+
+            if data.get("error") or data.get("status") == "error":
+                app.logger.error(
+                    "Government API returned an error during district lookup."
+                )
+
+                return {
+                    "success": False,
+                    "message": "Government API returned an error.",
+                    "districts": []
+                }, 502
+
+            records = data.get("records", [])
+
+            if not isinstance(records, list):
+                return {
+                    "success": False,
+                    "message": "District records are unavailable.",
+                    "districts": []
+                }, 502
+
+            for record in records:
+                if not isinstance(record, dict):
+                    continue
+
+                name = record.get("district_name")
+
+                if name and str(name).strip():
+                    districts.add(str(name).strip())
+
+            if len(records) < page_size:
+                break
+
+        return {
+            "success": True,
+            "state": state,
+            "districts": sorted(districts),
+            "count": len(districts)
+        }
+
+    except subprocess.TimeoutExpired:
+        app.logger.exception("District lookup timed out.")
+
+        return {
+            "success": False,
+            "message": "District lookup timed out. Please try again.",
+            "districts": []
+        }, 504
+
+    except requests.Timeout:
+        app.logger.exception("District lookup timed out.")
+
+        return {
+            "success": False,
+            "message": "District lookup timed out. Please try again.",
+            "districts": []
+        }, 504
+
+    except requests.RequestException as e:
+        app.logger.exception(
+            "District lookup failed: %s", str(e)
+        )
+
+        return {
+            "success": False,
+            "message": f"District API request failed: {str(e)}",
+            "districts": []
+        }, 502
+
+    except (ValueError, TypeError):
+        app.logger.exception(
+            "Invalid district API response."
+        )
+
+        return {
+            "success": False,
+            "message": "District API returned invalid data.",
+            "districts": []
+        }, 502
+
+ # -------- CROP PRODUCTION AVAILABLE YEARS API --------
+
+@app.route("/api/crop-production/years")
+def crop_production_years_api():
+
+    state = request.args.get("state", "").strip()
+    district = request.args.get("district", "").strip()
+    crop = request.args.get("crop", "").strip()
+    season = request.args.get("season", "").strip()
+
+    # Cache verified from previous API tests
+    state_years = {
+        "punjab": list(range(2014, 1996, -1)),
+        "odisha": list(range(2015, 1996, -1))
+    }
+
+    if state.lower() in state_years:
+        years = state_years[state.lower()]
+
+        return jsonify({
+            "success": True,
+            "years": years,
+            "count": len(years),
+            "filters": {
+                "state": state,
+                "district": district,
+                "crop": crop,
+                "season": season
+            }
+        })
+
+    # Fetch actual available years for other states
+    try:
+        years_found = set()
+        offset = 0
+        page_size = 100
+        max_pages = 10
+
+        for _ in range(max_pages):
+
+            params = {
+                "api-key": DATA_GOV_API_KEY,
+                "format": "json",
+                "limit": page_size,
+                "offset": offset
+            }
+
+            if state:
+                params["filters[state_name]"] = state
+
+            if district:
+                params["filters[district_name]"] = district
+
+            if crop:
+                params["filters[crop]"] = crop
+
+            if season:
+                params["filters[season]"] = season
+
+            result = fetch_crop_production_data(params)
+
+            records = result.get("records", [])
+
+            if not records:
+                break
+
+            for record in records:
+                year = record.get("crop_year")
+
+                if year not in (None, ""):
+                    try:
+                        years_found.add(int(float(year)))
+                    except (ValueError, TypeError):
+                        pass
+
+            if len(records) < page_size:
+                break
+
+            offset += page_size
+
+        years = sorted(years_found, reverse=True)
+
+        if not years:
+            return jsonify({
+                "success": False,
+                "message": "No available years found for these filters.",
+                "years": []
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "years": years,
+            "count": len(years),
+            "filters": {
+                "state": state,
+                "district": district,
+                "crop": crop,
+                "season": season
+            }
+        })
+
+    except (requests.RequestException, subprocess.TimeoutExpired) as exc:
+        app.logger.warning(
+            "Could not fetch available crop years: %s", exc
+        )
+
+        return jsonify({
+            "success": False,
+            "message": "Government API is temporarily unavailable.",
+            "years": []
+        }), 502
+
+    except (ValueError, TypeError) as exc:
+        app.logger.exception("Error processing crop years.")
+
+        return jsonify({
+            "success": False,
+            "message": "Could not process available years.",
+            "years": []
+        }), 502
+    
+    # ---------------- CROP PRODUCTION DASHBOARD ----------------
+
+@app.route("/crop-production")
+def crop_production_page():
+    return render_template("crop_production.html")
 # ---------------- CROP INFORMATION API ----------------
 
 @app.route("/api/crop-info/<crop_name>")
@@ -72,16 +1103,25 @@ def crop_info_api(crop_name):
                 "message": "Crop not found."
             }, 404
 
+        crop_details = {
+            "id": crop["id"],
+            "name": crop["name"],
+            "season": crop["season"],
+            "duration": crop["duration"],
+            "description": crop["description"]
+        }
+
+        extra_info = CROP_EXTRA_INFO.get(
+            crop["name"].strip().lower(),
+            {}
+        )
+
+        crop_details.update(extra_info)
+
         return {
             "success": True,
             "source": "SQLite",
-            "crop": {
-                "id": crop["id"],
-                "name": crop["name"],
-                "season": crop["season"],
-                "duration": crop["duration"],
-                "description": crop["description"]
-            }
+            "crop": crop_details
         }
 
     except sqlite3.Error:
@@ -94,6 +1134,8 @@ def crop_info_api(crop_name):
 
     finally:
         conn.close()
+
+
 # ---------------- DATABASE ----------------
 
 def get_db():
