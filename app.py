@@ -486,8 +486,7 @@ def fetch_crop_production_data(params):
 def crop_production_connection_test():
     try:
         response = requests.get(
-            "https://api.data.gov.in/resource/"
-            + CROP_PRODUCTION_RESOURCE_ID,
+            CROP_PRODUCTION_API_URL,
             params={
                 "api-key": CROP_PRODUCTION_API_KEY,
                 "format": "json",
@@ -507,11 +506,14 @@ def crop_production_connection_test():
         }), 200
 
     except requests.RequestException as exc:
-        app.logger.exception("Government API connection test failed.")
+        app.logger.exception(
+            "Government API connection test failed."
+        )
 
         return jsonify({
             "success": False,
             "error_type": type(exc).__name__,
+            "error_details": str(exc)[:500],
             "message": "Could not connect to Government API."
         }), 502
 # -------- CROP PRODUCTION CSV DOWNLOAD --------
