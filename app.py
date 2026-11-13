@@ -5,6 +5,7 @@ from flask import (
 import sqlite3
 import os
 from datetime import date
+from datetime import datetime
 import requests
 from dotenv import load_dotenv
 import time
@@ -24,8 +25,7 @@ load_dotenv(
 )
 
 app = Flask(__name__)
-
-DATA_GOV_API_KEY = os.getenv("DATA_GOV_API_KEY")
+DATA_GOV_API_KEY = os.getenv("DATA_GOV_API_KEY", "").strip()
 
 CROP_PRODUCTION_API_KEY = os.getenv("CROP_PRODUCTION_API_KEY")
 
@@ -2339,7 +2339,24 @@ def sowing_advice():
             "success": False,
             "message": "Could not process location or weather data."
         }, 500
-# ---------------- MANDI PRICES ----------------
+
+# =====================================================
+# KRISHIORBIT - MANDI PRICES MODULE
+# =====================================================
+
+import os
+import json
+import time
+import subprocess
+import requests
+
+from datetime import datetime
+from flask import request, render_template
+
+
+# =====================================================
+# MANDI API CONFIGURATION
+# =====================================================
 
 MANDI_API_URL = (
     "https://api.data.gov.in/resource/"
@@ -2347,106 +2364,200 @@ MANDI_API_URL = (
 )
 
 
-# ---------------- MANDI API HELPER ----------------
+# =====================================================
+# API KEY
+# =====================================================
+
+DATA_GOV_API_KEY = os.getenv("DATA_GOV_API_KEY", "").strip()
+
+
+# =====================================================
+# MANDI API HELPER
+# =====================================================
 
 def fetch_mandi_data(params):
-    """Fetch mandi data using curl on Windows and requests elsewhere."""
+    """
+    Fetch mandi prices from Government Data API.
 
-    # Windows par curl.exe use karein
+    Windows: Uses curl.exe
+    Other platforms: Uses Python requests
+    """
+
     if os.name == "nt":
+
         command = [
             "curl.exe",
             "-sS",
+            "--connect-timeout", "15",
+            "--max-time", "45",
             "-G",
             MANDI_API_URL,
         ]
 
-        # API key aur filters sahit sabhi parameters bhejein
         for key, value in params.items():
+
             command.extend([
                 "--data-urlencode",
-                f"{key}={value}",
+                f"{key}={value}"
             ])
-
-        command.extend([
-            "--connect-timeout", "10",
-            "--max-time", "20",
-        ])
 
         result = subprocess.run(
             command,
             capture_output=True,
             text=True,
-            timeout=25,
-            check=True,
+            timeout=50,
+            check=True
         )
 
-        result_data = json.loads(result.stdout)
+        if not result.stdout.strip():
+            raise RuntimeError("Mandi API returned an empty response.")
 
-        if result_data.get("error"):
-            raise RuntimeError(str(result_data["error"]))
+        data = json.loads(result.stdout)
 
-        if result_data.get("status") != "ok":
-            raise RuntimeError("Mandi API se valid response nahi mila.")
+    else:
 
-        return result_data
+        response = requests.get(
+            MANDI_API_URL,
+            params=params,
+            timeout=(15, 45)
+        )
 
-    # Render aur other platforms par requests use karein
-    response = requests.get(
-        MANDI_API_URL,
-        params=params,
-        timeout=(10, 30),
-    )
+        try:
+            response.raise_for_status()
+            data = response.json()
+
+        finally:
+            response.close()
+
+    # Check API errors
+
+    if data.get("error"):
+        raise RuntimeError(data["error"])
+
+    if data.get("status") != "ok":
+        raise RuntimeError(
+            data.get("message", "Invalid Mandi API response.")
+        )
+
+    return data
+
+
+# =====================================================
+# DATE SORTING HELPER
+# =====================================================
+
+def parse_mandi_date(date_value):
+
+    if not date_value:
+        return datetime.min
 
     try:
-        response.raise_for_status()
-        result_data = response.json()
+        return datetime.strptime(
+            date_value.strip(),
+            "%d/%m/%Y"
+        )
 
-        if result_data.get("error"):
-            raise RuntimeError(str(result_data["error"]))
-
-        if result_data.get("status") != "ok":
-            raise RuntimeError("Mandi API se valid response nahi mila.")
-
-        return result_data
-
-    finally:
-        response.close()
+    except (ValueError, TypeError):
+        return datetime.min
 
 
-# ---------------- MANDI ROUTE ----------------
+# =====================================================
+# MANDI PRICES - ADVANCED DASHBOARD
+# =====================================================
+
+from datetime import datetime
+
+
+def parse_mandi_date(date_value):
+    if not date_value:
+        return datetime.min
+
+    try:
+        return datetime.strptime(
+            date_value.strip(),
+            "%d/%m/%Y"
+        )
+    except (ValueError, TypeError):
+        return datetime.min
+
 
 @app.route("/mandi")
 def mandi():
+
     prices = []
     error = None
     data = None
 
-    # Search filters
+    # ---------------------------------
+    # SEARCH FILTERS
+    # ---------------------------------
+
     state = request.args.get("state", "").strip()
     district = request.args.get("district", "").strip()
     commodity = request.args.get("commodity", "").strip()
     market = request.args.get("market", "").strip()
 
-    # Search button dabane par hi API request chalegi
     searched = request.args.get("search") == "1"
+
+    # ---------------------------------
+    # PAGINATION
+    # ---------------------------------
+
+    try:
+        page = max(1, int(request.args.get("page", 1)))
+    except (ValueError, TypeError):
+        page = 1
+
+    limit = 100
+    offset = (page - 1) * limit
+
+    # ---------------------------------
+    # SORTING
+    # ---------------------------------
+
+    sort_by = request.args.get(
+        "sort_by",
+        "latest"
+    ).strip()
+
+    allowed_sorts = {
+        "latest",
+        "price_low",
+        "price_high"
+    }
+
+    if sort_by not in allowed_sorts:
+        sort_by = "latest"
+
+    total_records = 0
+    has_more = False
+
+    # ---------------------------------
+    # API REQUEST
+    # ---------------------------------
 
     if searched:
 
         if not DATA_GOV_API_KEY:
-            error = "Mandi API key nahi mili. Configuration check karein."
+
+            error = (
+                "Mandi API key nahi mili. "
+                "Configuration check karein."
+            )
 
         else:
+
             params = {
                 "api-key": DATA_GOV_API_KEY,
                 "format": "json",
-                "offset": 0,
-                "limit": 100,
+                "offset": offset,
+                "limit": limit
             }
 
-            # Apply filters
+            # Filters
+
             if state:
-                params["filters[state]"] = state
+                params["filters[state.keyword]"] = state
 
             if district:
                 params["filters[district]"] = district
@@ -2457,86 +2568,198 @@ def mandi():
             if market:
                 params["filters[market]"] = market
 
-            # API request with retry
+            # Request API
+
             for attempt in range(3):
+
                 try:
+
                     data = fetch_mandi_data(params)
+
                     break
 
                 except (
                     requests.exceptions.RequestException,
                     subprocess.SubprocessError,
-                    ValueError,
+                    json.JSONDecodeError,
                     RuntimeError,
+                    ValueError
                 ) as e:
 
                     print(
                         f"MANDI API ERROR "
-                        f"(attempt {attempt + 1}/3): "
-                        f"{type(e).__name__}: {e}"
+                        f"(attempt {attempt + 1}/3): {e}"
                     )
 
                     data = None
 
                     if attempt < 2:
                         time.sleep(2 ** (attempt + 1))
+
                     else:
                         error = (
-                            "Mandi prices abhi load nahi ho pa rahe hain. "
-                            "Kripya kuch der baad dobara try karein."
+                            "Mandi prices temporarily unavailable. "
+                            "Please try again later."
                         )
 
-            # Convert API records into template data
+            # ---------------------------------
+            # PROCESS API RESPONSE
+            # ---------------------------------
+
             if data is not None:
 
-                for item in data.get("records", []):
+                records = data.get("records", [])
+
+                try:
+                    total_records = int(data.get("total", 0))
+                except (ValueError, TypeError):
+                    total_records = 0
+
+                has_more = (
+                    offset + len(records) < total_records
+                )
+
+                for item in records:
 
                     modal_price = item.get("modal_price")
 
+                    min_price = item.get("min_price")
+                    max_price = item.get("max_price")
+
                     try:
+
                         price_per_kg = (
                             round(float(modal_price) / 100, 2)
                             if modal_price not in ("", None)
                             else None
                         )
+
                     except (ValueError, TypeError):
+
                         price_per_kg = None
 
+                    try:
+
+                        numeric_price = (
+                            float(modal_price)
+                            if modal_price not in ("", None)
+                            else None
+                        )
+
+                    except (ValueError, TypeError):
+
+                        numeric_price = None
+
                     prices.append({
-                        "crop": item.get("commodity", "Unknown"),
-                        "state": item.get("state", ""),
-                        "district": item.get("district", ""),
-                        "market": item.get("market", ""),
-                        "variety": item.get("variety", ""),
-                        "arrival_date": item.get("arrival_date", ""),
-                        "min_price": item.get("min_price", ""),
-                        "max_price": item.get("max_price", ""),
-                        "price": (
-                            modal_price
-                            if modal_price is not None
-                            else ""
+
+                        "crop": item.get(
+                            "commodity",
+                            "Unknown"
                         ),
+
+                        "state": item.get("state", ""),
+
+                        "district": item.get("district", ""),
+
+                        "market": item.get("market", ""),
+
+                        "variety": item.get("variety", ""),
+
+                        "arrival_date": item.get(
+                            "arrival_date",
+                            ""
+                        ),
+
+                        "min_price": min_price or "",
+
+                        "max_price": max_price or "",
+
+                        "price": modal_price or "",
+
+                        "numeric_price": numeric_price,
+
                         "price_per_kg": price_per_kg,
+
                         "unit": "per quintal",
-                        "source": "data.gov.in / AGMARKNET",
+
+                        "source": "data.gov.in / AGMARKNET"
+
                     })
 
+                # ---------------------------------
+                # SORT CURRENT PAGE RECORDS
+                # ---------------------------------
+
+                if sort_by == "latest":
+
+                    prices.sort(
+                        key=lambda item: parse_mandi_date(
+                            item["arrival_date"]
+                        ),
+                        reverse=True
+                    )
+
+                elif sort_by == "price_low":
+
+                    prices.sort(
+                        key=lambda item: (
+                            item["numeric_price"]
+                            if item["numeric_price"] is not None
+                            else float("inf")
+                        )
+                    )
+
+                elif sort_by == "price_high":
+
+                    prices.sort(
+                        key=lambda item: (
+                            item["numeric_price"]
+                            if item["numeric_price"] is not None
+                            else float("-inf")
+                        ),
+                        reverse=True
+                    )
+
                 if not prices and not error:
-                    error = "Is selection ke liye mandi data nahi mila."
+
+                    error = (
+                        "Is selection ke liye mandi data nahi mila. "
+                        "Please try another crop or location."
+                    )
+
+    # ---------------------------------
+    # RENDER TEMPLATE
+    # ---------------------------------
 
     return render_template(
+
         "mandi.html",
+
         prices=prices,
+
         error=error,
+
         state=state,
+
         district=district,
+
         commodity=commodity,
+
         market=market,
+
         searched=searched,
+
+        page=page,
+
+        limit=limit,
+
+        total_records=total_records,
+
+        has_more=has_more,
+
+        sort_by=sort_by
+
     )
-
-
-
 # ---------------- KISAN YOJANA ----------------
 
 @app.route("/yojana")
